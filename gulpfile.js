@@ -13,7 +13,7 @@ var paths = {
     sass: ['./scss/**/*.scss']
 };
 
-gulp.task('default', ['sass', "compile:ts"]);
+gulp.task('default', ['sass', "compile:ts", "concat:js"]);
 
 gulp.task('sass', function(done) {
     gulp.src('./scss/ionic.app.scss')
@@ -69,4 +69,14 @@ gulp.task("compile:ts", ["lint:ts"], function() {
         .pipe(ts(tsProject))
         .js
         .pipe(gulp.dest("www/js"));
+});
+
+gulp.task("concat:js", function() {
+    return gulp.src([
+        "node_modules/systemjs/dist/system.js",
+        "node_modules/systemjs/dist/system-polyfills.js",
+        "node_modules/lodash/lodash.js",
+    ])
+    .pipe(concat("lib.js"))
+    .pipe(gulp.dest("www/js"));
 });
