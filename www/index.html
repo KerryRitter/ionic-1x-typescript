@@ -22,5 +22,16 @@
       <ion-content>
       </ion-content>
     </ion-pane>
+
+    <script>
+    System.import("app")
+      .then(function () {
+        angular.bootstrap(document, ["app"]);
+        console.info("System.import was successful.");
+      })
+      .catch(function (response) {
+        console.error("Error in System.import, could not bootstrap.", response);
+      });
+    </script>
   </body>
 </html>

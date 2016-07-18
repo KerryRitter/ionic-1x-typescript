@@ -20,7 +20,8 @@ import { IonicApplication, Page } from "../app";
                     Login
                 </button>
             </ion-content>
-        </ion-view>`
+        </ion-view>
+    `
 })
 export class Login {
     public login(name: string, password: string) {
