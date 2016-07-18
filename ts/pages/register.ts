@@ -1,8 +1,8 @@
 import { IonicApplication, Page } from "../app";
 
-@Page(IonicApplication, "login", {
+@Page(IonicApplication, "register", {
     template: `
-        <ion-view title="Login">
+        <ion-view title="Register">
             <ion-nav-bar class="bar-balanced">
                 <ion-nav-back-button>
                 </ion-nav-back-button>
@@ -16,15 +16,15 @@ import { IonicApplication, Page } from "../app";
                     <span class="input-label">Password</span>
                     <input type="password" ng-model="password">
                 </label>
-                <button type="submit" class="button button-calm button-block" ng-click="$ctrl.login(name, password)">
+                <button type="submit" class="button button-calm button-block" ng-click="$ctrl.register(name, password)">
                     Login
                 </button>
             </ion-content>
         </ion-view>
     `
 })
-export class LoginController {
-    public login(name: string, password: string) {
+export class RegisterController {
+    public register(name: string, password: string) {
         console.log(name, password);
     }
 }
