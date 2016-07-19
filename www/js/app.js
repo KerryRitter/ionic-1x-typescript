@@ -355,6 +355,7 @@ System.register("ionic-typescript/decorators", [], function(exports_1, context_1
         }
     }
 });
+/// <reference path="typings.d.ts" />
 System.register("ts/app", ["ionic-typescript/decorators"], function(exports_2, context_2) {
     "use strict";
     var __moduleName = context_2 && context_2.id;
@@ -401,33 +402,212 @@ System.register("ts/app", ["ionic-typescript/decorators"], function(exports_2, c
         }
     }
 });
-console.log(5 + 5);
-System.register("ts/pages/login", ["ts/app"], function(exports_3, context_3) {
+System.register("ts/pages/forgotPassword", ["ts/app"], function(exports_3, context_3) {
     "use strict";
     var __moduleName = context_3 && context_3.id;
     var app_1;
-    var Login;
+    var ForgotPasswordController;
     return {
         setters:[
             function (app_1_1) {
                 app_1 = app_1_1;
             }],
         execute: function() {
-            Login = (function () {
-                function Login() {
+            ForgotPasswordController = (function () {
+                function ForgotPasswordController() {
                 }
-                Login.prototype.login = function (name, password) {
-                    console.log(name, password);
+                ForgotPasswordController.prototype.forgotPassword = function (name) {
+                    console.log(name);
                 };
-                Login = __decorate([
-                    app_1.Page(app_1.IonicApplication, "login", {
-                        template: "\n        <ion-view title=\"Login\">\n            <ion-nav-bar class=\"bar-balanced\">\n                <ion-nav-back-button>\n                </ion-nav-back-button>\n            </ion-nav-bar>\n            <ion-content padding=\"true\" scroll=\"false\">\n                <label class=\"item item-input\" style=\"margin-bottom: 40px;\">\n                    <span class=\"input-label\">Name</span>\n                    <input type=\"text\" ng-model=\"name\">\n                </label>\n                <label class=\"item item-input\" style=\"margin-bottom: 40px;\">\n                    <span class=\"input-label\">Password</span>\n                    <input type=\"password\" ng-model=\"password\">\n                </label>\n                <button type=\"submit\" class=\"button button-calm button-block\" ng-click=\"$ctrl.login(name, password)\">\n                    Login\n                </button>\n            </ion-content>\n        </ion-view>"
+                ForgotPasswordController = __decorate([
+                    app_1.Page(app_1.IonicApplication, "register", {
+                        template: "\n        <ion-view title=\"Register\">\n            <ion-nav-bar class=\"bar-balanced\">\n                <ion-nav-back-button>\n                </ion-nav-back-button>\n            </ion-nav-bar>\n            <ion-content padding=\"true\" scroll=\"false\">\n                <label class=\"item item-input\" style=\"margin-bottom: 40px;\">\n                    <span class=\"input-label\">Name</span>\n                    <input type=\"text\" ng-model=\"name\">\n                </label>\n                <button type=\"submit\" class=\"button button-calm button-block\" ng-click=\"$ctrl.forgotPassword(name)\">\n                    Login\n                </button>\n            </ion-content>\n        </ion-view>\n    "
                     }), 
                     __metadata('design:paramtypes', [])
-                ], Login);
-                return Login;
+                ], ForgotPasswordController);
+                return ForgotPasswordController;
             }());
-            exports_3("Login", Login);
+            exports_3("ForgotPasswordController", ForgotPasswordController);
+        }
+    }
+});
+System.register("ts/pages/login", ["ts/app"], function(exports_4, context_4) {
+    "use strict";
+    var __moduleName = context_4 && context_4.id;
+    var app_2;
+    var LoginController;
+    return {
+        setters:[
+            function (app_2_1) {
+                app_2 = app_2_1;
+            }],
+        execute: function() {
+            LoginController = (function () {
+                function LoginController() {
+                }
+                LoginController.prototype.login = function (name, password) {
+                    console.log(name, password);
+                };
+                LoginController = __decorate([
+                    app_2.Page(app_2.IonicApplication, "login", {
+                        template: "\n        <ion-view title=\"Login\">\n            <ion-nav-bar class=\"bar-balanced\">\n                <ion-nav-back-button>\n                </ion-nav-back-button>\n            </ion-nav-bar>\n            <ion-content padding=\"true\" scroll=\"false\">\n                <label class=\"item item-input\" style=\"margin-bottom: 40px;\">\n                    <span class=\"input-label\">Name</span>\n                    <input type=\"text\" ng-model=\"name\">\n                </label>\n                <label class=\"item item-input\" style=\"margin-bottom: 40px;\">\n                    <span class=\"input-label\">Password</span>\n                    <input type=\"password\" ng-model=\"password\">\n                </label>\n                <button type=\"submit\" class=\"button button-calm button-block\" ng-click=\"$ctrl.login(name, password)\">\n                    Login\n                </button>\n            </ion-content>\n        </ion-view>\n    "
+                    }), 
+                    __metadata('design:paramtypes', [])
+                ], LoginController);
+                return LoginController;
+            }());
+            exports_4("LoginController", LoginController);
+        }
+    }
+});
+System.register("ts/pages/register", ["ts/app"], function(exports_5, context_5) {
+    "use strict";
+    var __moduleName = context_5 && context_5.id;
+    var app_3;
+    var RegisterController;
+    return {
+        setters:[
+            function (app_3_1) {
+                app_3 = app_3_1;
+            }],
+        execute: function() {
+            RegisterController = (function () {
+                function RegisterController() {
+                }
+                RegisterController.prototype.register = function (name, password) {
+                    console.log(name, password);
+                };
+                RegisterController = __decorate([
+                    app_3.Page(app_3.IonicApplication, "register", {
+                        template: "\n        <ion-view title=\"Register\">\n            <ion-nav-bar class=\"bar-balanced\">\n                <ion-nav-back-button>\n                </ion-nav-back-button>\n            </ion-nav-bar>\n            <ion-content padding=\"true\" scroll=\"false\">\n                <label class=\"item item-input\" style=\"margin-bottom: 40px;\">\n                    <span class=\"input-label\">Name</span>\n                    <input type=\"text\" ng-model=\"name\">\n                </label>\n                <label class=\"item item-input\" style=\"margin-bottom: 40px;\">\n                    <span class=\"input-label\">Password</span>\n                    <input type=\"password\" ng-model=\"password\">\n                </label>\n                <button type=\"submit\" class=\"button button-calm button-block\" ng-click=\"$ctrl.register(name, password)\">\n                    Register\n                </button>\n            </ion-content>\n        </ion-view>\n    "
+                    }), 
+                    __metadata('design:paramtypes', [])
+                ], RegisterController);
+                return RegisterController;
+            }());
+            exports_5("RegisterController", RegisterController);
+        }
+    }
+});
+System.register("ts/services/openIdHttpService", ["ts/app"], function(exports_6, context_6) {
+    "use strict";
+    var __moduleName = context_6 && context_6.id;
+    var app_4;
+    var OpenIdHttpService;
+    return {
+        setters:[
+            function (app_4_1) {
+                app_4 = app_4_1;
+            }],
+        execute: function() {
+            OpenIdHttpService = (function () {
+                function OpenIdHttpService(_httpService, _windowService, _qService) {
+                    this._httpService = _httpService;
+                    this._windowService = _windowService;
+                    this._qService = _qService;
+                }
+                OpenIdHttpService.prototype.login = function (username, password) {
+                    var _this = this;
+                    return this._qService(function (resolve, reject) {
+                        return _this._httpService({
+                            method: "POST",
+                            url: "token",
+                            data: {
+                                username: username,
+                                password: password,
+                                grant_type: "password"
+                            },
+                            transformRequest: function (obj) {
+                                var str = [];
+                                for (var p in obj) {
+                                    str.push(encodeURIComponent(p) + "=" + encodeURIComponent(obj[p]));
+                                }
+                                return str.join("&");
+                            }
+                        })
+                            .success(function (data, status, headers, config) {
+                            if (data.error) {
+                                _this._windowService.localStorage.setItem("token", JSON.stringify(data));
+                                resolve([false, [data.error_description]]);
+                            }
+                            else {
+                                _this._windowService.localStorage.setItem("token", JSON.stringify(data));
+                                resolve([true, null]);
+                            }
+                        }).error(function (data, status, headers, config) {
+                            reject([false, ["There was a server communication error."]]);
+                        });
+                    });
+                };
+                OpenIdHttpService.prototype.request = function (config) {
+                    return null;
+                };
+                OpenIdHttpService.prototype.get = function (url, config) {
+                    return null;
+                };
+                OpenIdHttpService.prototype.delete = function (url, config) {
+                    return null;
+                };
+                OpenIdHttpService.prototype.head = function (url, config) {
+                    return null;
+                };
+                OpenIdHttpService.prototype.jsonp = function (url, config) {
+                    return null;
+                };
+                OpenIdHttpService.prototype.post = function (url, data, config) {
+                    return null;
+                };
+                OpenIdHttpService.prototype.put = function (url, data, config) {
+                    return null;
+                };
+                OpenIdHttpService.prototype.patch = function (url, data, config) {
+                    return null;
+                };
+                OpenIdHttpService.prototype.addTokenHeader = function (config) {
+                    var token = this._windowService.localStorage.getItem("token");
+                    if (config === null) {
+                        return {
+                            headers: {
+                                "Authorization": "Token " + token.access_token,
+                                "Content-Type": "application/x-www-form-urlencoded"
+                            }
+                        };
+                    }
+                };
+                OpenIdHttpService.prototype.reloadTokenIfNeeded = function () {
+                    var currentTime = new Date().getTime();
+                    var token = this._windowService.localStorage.getItem("token");
+                    if (currentTime < token.expires_at) {
+                        return this._qService.resolve(token);
+                    }
+                    this._httpService({
+                        method: "POST",
+                        url: "token",
+                        data: {
+                            refresh_token: token.refresh_token,
+                            grant_type: "refresh_token",
+                            scope: "offline_access"
+                        },
+                        transformRequest: function (obj) {
+                            var str = [];
+                            for (var p in obj) {
+                                str.push(encodeURIComponent(p) + "=" + encodeURIComponent(obj[p]));
+                            }
+                            return str.join("&");
+                        }
+                    });
+                    return this._qService.resolve(null);
+                };
+                OpenIdHttpService = __decorate([
+                    app_4.Service(app_4.IonicApplication, "openIdHttpService"),
+                    __param(0, app_4.Inject("$http")),
+                    __param(1, app_4.Inject("$window")),
+                    __param(2, app_4.Inject("$q")), 
+                    __metadata('design:paramtypes', [Function, Object, Function])
+                ], OpenIdHttpService);
+                return OpenIdHttpService;
+            }());
+            exports_6("OpenIdHttpService", OpenIdHttpService);
         }
     }
 });

@@ -17,7 +17,7 @@ import { IonicApplication, Page } from "../app";
                     <input type="password" ng-model="password">
                 </label>
                 <button type="submit" class="button button-calm button-block" ng-click="$ctrl.register(name, password)">
-                    Login
+                    Register
                 </button>
             </ion-content>
         </ion-view>
