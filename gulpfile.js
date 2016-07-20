@@ -30,6 +30,7 @@ gulp.task('sass', function(done) {
 
 gulp.task('watch', function() {
     gulp.watch(paths.sass, ['sass']);
+    gulp.watch("ts/**/*.ts", ["compile:ts"]);
 });
 
 gulp.task('install', ['git-check'], function() {
@@ -75,7 +76,7 @@ gulp.task("concat:js", function() {
     return gulp.src([
         "node_modules/systemjs/dist/system.js",
         "node_modules/systemjs/dist/system-polyfills.js",
-        "node_modules/lodash/lodash.js",
+        "node_modules/lodash/lodash.js"
     ])
     .pipe(concat("lib.js"))
     .pipe(gulp.dest("www/js"));

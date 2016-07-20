@@ -1,4 +1,4 @@
-import { IonicApplication, Page } from "../app";
+import { IonicApplication, Page, Inject} from "../app";
 
 @Page(IonicApplication, "register", {
     template: `
@@ -21,10 +21,22 @@ import { IonicApplication, Page } from "../app";
                 </button>
             </ion-content>
         </ion-view>
-    `
+    `,
 })
 export class RegisterController {
-    public register(name: string, password: string) {
-        console.log(name, password);
+    public constructor(
+        @Inject("$log") private _logService: ng.ILogService,
+        @Inject("openIddictHttpService") private _openIddictHttpService: IOpenIddictHttpService
+    ) {
+    }
+
+    public register(username: string, password: string) {
+        this._openIddictHttpService.register(username, password)
+            .then((response) => {
+                console.log(response);
+            })
+            .catch((response) => {
+                console.log(response);
+            });
     }
 }

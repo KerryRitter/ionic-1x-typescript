@@ -1,4 +1,4 @@
-import { IonicApplication, Page } from "../app";
+import { IonicApplication, Page, Inject } from "../app";
 
 @Page(IonicApplication, "login", {
     template: `
@@ -24,7 +24,19 @@ import { IonicApplication, Page } from "../app";
     `
 })
 export class LoginController {
-    public login(name: string, password: string) {
-        console.log(name, password);
+    public constructor(
+        @Inject("$log") private _logService: ng.ILogService,
+        @Inject("openIddictHttpService") private _openIddictHttpService: IOpenIddictHttpService
+    ) {
+    }
+
+    public register(username: string, password: string) {
+        this._openIddictHttpService.login(username, password)
+            .then((response) => {
+                console.log(response);
+            })
+            .catch((response) => {
+                console.log(response);
+            });
     }
 }

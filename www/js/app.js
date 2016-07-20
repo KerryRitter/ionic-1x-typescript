@@ -10,10 +10,178 @@ var __metadata = (this && this.__metadata) || function (k, v) {
 var __param = (this && this.__param) || function (paramIndex, decorator) {
     return function (target, key) { decorator(target, key, paramIndex); }
 };
-/// <reference path="../typings/index.d.ts" />
-System.register("ionic-typescript/decorators", [], function(exports_1, context_1) {
+System.register("angular-openiddict/openIddictHttpService", [], function(exports_1, context_1) {
     "use strict";
     var __moduleName = context_1 && context_1.id;
+    var OpenIddictHttpService;
+    return {
+        setters:[],
+        execute: function() {
+            OpenIddictHttpService = (function () {
+                function OpenIddictHttpService(_httpService, _windowService, _qService, _settings) {
+                    this._httpService = _httpService;
+                    this._windowService = _windowService;
+                    this._qService = _qService;
+                    this._settings = _settings;
+                }
+                OpenIddictHttpService.prototype.register = function (username, password) {
+                    var _this = this;
+                    return this._qService(function (resolve, reject) {
+                        return _this._httpService({
+                            method: "POST",
+                            url: _this._settings.registerUrl,
+                            data: {
+                                username: username,
+                                password: password,
+                            }
+                        })
+                            .success(function (data, status, headers, config) {
+                            if (data.error) {
+                                resolve({
+                                    success: false,
+                                    messages: [data.error_description]
+                                });
+                            }
+                            else {
+                                _this._windowService.localStorage.setItem("token", JSON.stringify(data));
+                                resolve({
+                                    success: true,
+                                    messages: null
+                                });
+                            }
+                        }).error(function (data, status, headers, config) {
+                            reject(data);
+                        });
+                    });
+                };
+                OpenIddictHttpService.prototype.login = function (username, password) {
+                    var _this = this;
+                    return this._qService(function (resolve, reject) {
+                        return _this._httpService({
+                            method: "POST",
+                            url: _this._settings.tokenUrl,
+                            data: {
+                                username: username,
+                                password: password,
+                                grant_type: "password"
+                            },
+                            transformRequest: _this.transformToQueryString
+                        })
+                            .success(function (data, status, headers, config) {
+                            if (data.error) {
+                                resolve({
+                                    success: false,
+                                    messages: [data.error_description]
+                                });
+                            }
+                            else {
+                                _this._windowService.localStorage.setItem("token", JSON.stringify(data));
+                                resolve({
+                                    success: true,
+                                    messages: null
+                                });
+                            }
+                        }).error(function (data, status, headers, config) {
+                            reject(data);
+                        });
+                    });
+                };
+                OpenIddictHttpService.prototype.get = function (url, config) {
+                    var _this = this;
+                    return this.reloadTokenIfNeededThenRequest(function (token) {
+                        return _this._httpService.get(url, _this.addTokenHeader(token, config));
+                    });
+                };
+                OpenIddictHttpService.prototype.delete = function (url, config) {
+                    var _this = this;
+                    return this.reloadTokenIfNeededThenRequest(function (token) {
+                        return _this._httpService.delete(url, _this.addTokenHeader(token, config));
+                    });
+                };
+                OpenIddictHttpService.prototype.head = function (url, config) {
+                    var _this = this;
+                    return this.reloadTokenIfNeededThenRequest(function (token) {
+                        return _this._httpService.head(url, _this.addTokenHeader(token, config));
+                    });
+                };
+                OpenIddictHttpService.prototype.jsonp = function (url, config) {
+                    var _this = this;
+                    return this.reloadTokenIfNeededThenRequest(function (token) {
+                        return _this._httpService.jsonp(url, _this.addTokenHeader(token, config));
+                    });
+                };
+                OpenIddictHttpService.prototype.post = function (url, data, config) {
+                    var _this = this;
+                    return this.reloadTokenIfNeededThenRequest(function (token) {
+                        return _this._httpService.post(url, data, _this.addTokenHeader(token, config));
+                    });
+                };
+                OpenIddictHttpService.prototype.put = function (url, data, config) {
+                    var _this = this;
+                    return this.reloadTokenIfNeededThenRequest(function (token) {
+                        return _this._httpService.put(url, data, _this.addTokenHeader(token, config));
+                    });
+                };
+                OpenIddictHttpService.prototype.patch = function (url, data, config) {
+                    var _this = this;
+                    return this.reloadTokenIfNeededThenRequest(function (token) {
+                        return _this._httpService.patch(url, data, _this.addTokenHeader(token, config));
+                    });
+                };
+                OpenIddictHttpService.prototype.addTokenHeader = function (token, config) {
+                    if (config === null) {
+                        return {
+                            headers: {
+                                "Authorization": "Token " + token.access_token,
+                                "Content-Type": "application/x-www-form-urlencoded"
+                            }
+                        };
+                    }
+                };
+                OpenIddictHttpService.prototype.reloadTokenIfNeededThenRequest = function (callback) {
+                    var _this = this;
+                    return this._qService(function (resolve, reject) {
+                        var currentTime = new Date().getTime();
+                        var token = _this._windowService.localStorage.getItem("token");
+                        if (currentTime < token.expires_at) {
+                            resolve(callback(token));
+                        }
+                        _this._httpService({
+                            method: "POST",
+                            url: _this._settings.tokenUrl,
+                            data: {
+                                refresh_token: token.refresh_token,
+                                grant_type: "refresh_token",
+                                scope: "offline_access"
+                            },
+                            transformRequest: _this.transformToQueryString
+                        })
+                            .then(function (response) {
+                            resolve(callback(response.data));
+                        })
+                            .catch(function (response) {
+                            reject(response);
+                        });
+                    });
+                };
+                OpenIddictHttpService.prototype.transformToQueryString = function (obj) {
+                    var str = [];
+                    for (var p in obj) {
+                        str.push(encodeURIComponent(p) + "=" + encodeURIComponent(obj[p]));
+                    }
+                    return str.join("&");
+                };
+                OpenIddictHttpService.$inject = ["$http", "$window", "$q", "openIddictHttpServiceSettings"];
+                return OpenIddictHttpService;
+            }());
+            exports_1("OpenIddictHttpService", OpenIddictHttpService);
+        }
+    }
+});
+/// <reference path="../typings/index.d.ts" />
+System.register("ionic-typescript/decorators", [], function(exports_2, context_2) {
+    "use strict";
+    var __moduleName = context_2 && context_2.id;
     /**
      * Define parameter injection to constructor or function
      * @param {string} dependency - name of provider to include as
@@ -26,7 +194,7 @@ System.register("ionic-typescript/decorators", [], function(exports_1, context_1
             target.$inject[index] = dependency;
         };
     }
-    exports_1("Inject", Inject);
+    exports_2("Inject", Inject);
     /**
      * Define module or service injection requirements.
      * @param {string} requires - 1 or more names of modules to require for module injection or providers to inject to constructor.
@@ -41,7 +209,7 @@ System.register("ionic-typescript/decorators", [], function(exports_1, context_1
             target.$inject = requires || [];
         };
     }
-    exports_1("Requires", Requires);
+    exports_2("Requires", Requires);
     /**
      * Declare angular service as class
      * Use @Requires to declare class requirements or @Inject in case of parameter based requirement declaration.
@@ -55,7 +223,7 @@ System.register("ionic-typescript/decorators", [], function(exports_1, context_1
             module.service(name, target);
         };
     }
-    exports_1("Service", Service);
+    exports_2("Service", Service);
     /**
      * Declare angular service with decorated factory method.
      * Use @Requires to declare class requirements or @Inject in case of parameter based requirement declaration.
@@ -69,7 +237,7 @@ System.register("ionic-typescript/decorators", [], function(exports_1, context_1
             module.service(name, target[key]);
         };
     }
-    exports_1("ServiceFactory", ServiceFactory);
+    exports_2("ServiceFactory", ServiceFactory);
     /**
      * Declare angular controller as class.
      * Use @Requires to declare requirements or @Inject in case of parameter based requirement declaration.
@@ -83,7 +251,7 @@ System.register("ionic-typescript/decorators", [], function(exports_1, context_1
             module.controller(name, target);
         };
     }
-    exports_1("Controller", Controller);
+    exports_2("Controller", Controller);
     /**
      * Declare angular factory as factory method.
      * Use @Requires to declare requirements or @Inject in case of parameter based requirement declaration
@@ -97,7 +265,7 @@ System.register("ionic-typescript/decorators", [], function(exports_1, context_1
             module.factory(name, target[key]);
         };
     }
-    exports_1("Factory", Factory);
+    exports_2("Factory", Factory);
     /**
      * Declare angular factory with decorated factory method.
      * Use @Requires to declare requirements or @Inject in case of parameter based requirement declaration.
@@ -111,7 +279,7 @@ System.register("ionic-typescript/decorators", [], function(exports_1, context_1
             module.filter(name, target[key]);
         };
     }
-    exports_1("Filter", Filter);
+    exports_2("Filter", Filter);
     /**
      * Declare angular factory as class.
      * New instance of factory decorated class will be instantiated for each injection.
@@ -131,7 +299,7 @@ System.register("ionic-typescript/decorators", [], function(exports_1, context_1
             module.factory(name, factory);
         };
     }
-    exports_1("ClassFactory", ClassFactory);
+    exports_2("ClassFactory", ClassFactory);
     /**
      * Declare angular directive with decorated class as controller.
      * Use @Requires to declare requirements or @Inject in case of parameter based requirement declaration.
@@ -148,7 +316,7 @@ System.register("ionic-typescript/decorators", [], function(exports_1, context_1
             });
         };
     }
-    exports_1("Directive", Directive);
+    exports_2("Directive", Directive);
     /**
      * Declare angular component with decorated class as controller.
      * Use @Requires to declare requirements or @Inject in case of parameter based requirement declaration.
@@ -163,7 +331,7 @@ System.register("ionic-typescript/decorators", [], function(exports_1, context_1
             module.component(name, angular.extend(component || {}, { controller: target }));
         };
     }
-    exports_1("Component", Component);
+    exports_2("Component", Component);
     /**
      * Declare angular directive with decorated factory method.
      * Use @Requires to declare requirements or @Inject in case of parameter based requirement declaration.
@@ -178,7 +346,7 @@ System.register("ionic-typescript/decorators", [], function(exports_1, context_1
             module.directive(name, target[key]);
         };
     }
-    exports_1("DirectiveFactory", DirectiveFactory);
+    exports_2("DirectiveFactory", DirectiveFactory);
     /**
      * Declare angular service provider with decorated class.
      * Use @Requires to declare requirements or @Inject in case of parameter based requirement declaration.
@@ -193,7 +361,7 @@ System.register("ionic-typescript/decorators", [], function(exports_1, context_1
             module.provider(name, target);
         };
     }
-    exports_1("Provider", Provider);
+    exports_2("Provider", Provider);
     /**
      * Declare angular service provider with decorated factory method.
      * Use @Requires to declare requirements or @Inject in case of parameter based requirement declaration.
@@ -207,7 +375,7 @@ System.register("ionic-typescript/decorators", [], function(exports_1, context_1
             module.provider(name, target[key]);
         };
     }
-    exports_1("ProviderFactory", ProviderFactory);
+    exports_2("ProviderFactory", ProviderFactory);
     /**
      * Declare angular constant provider with decorated class.
      * Injections are unavailable for this type of providers.
@@ -221,7 +389,7 @@ System.register("ionic-typescript/decorators", [], function(exports_1, context_1
             module.constant(name, new target());
         };
     }
-    exports_1("Constant", Constant);
+    exports_2("Constant", Constant);
     /**
      * Declare angular value provider with decorated class.
      * Injections are unavailable for this type of providers.
@@ -235,7 +403,7 @@ System.register("ionic-typescript/decorators", [], function(exports_1, context_1
             module.value(name, new target());
         };
     }
-    exports_1("Value", Value);
+    exports_2("Value", Value);
     /**
      * Declare angular config clause with decorated class. New instance of decorated class will be instantiated inside config clause.
      * Use @Requires to declare requirements or @Inject in case of parameter based requirement declaration.
@@ -254,7 +422,7 @@ System.register("ionic-typescript/decorators", [], function(exports_1, context_1
             module.config(config);
         };
     }
-    exports_1("Config", Config);
+    exports_2("Config", Config);
     /**
      * Declare angular run clause with decorated class. New instance of decorated class will be instantiated inside run clause.
      * Use @Requires to declare requirements or @Inject in case of parameter based requirement declaration.
@@ -272,7 +440,7 @@ System.register("ionic-typescript/decorators", [], function(exports_1, context_1
             module.run(run);
         };
     }
-    exports_1("Run", Run);
+    exports_2("Run", Run);
     /**
      * Declare angular module with given name.
      * Use @Requires to declare requirements.
@@ -287,7 +455,7 @@ System.register("ionic-typescript/decorators", [], function(exports_1, context_1
             new target(angular.module(name, target.$inject || []));
         };
     }
-    exports_1("Module", Module);
+    exports_2("Module", Module);
     /**
      * Declare angular module with given name.
      * Use @Requires to declare requirements.
@@ -320,7 +488,7 @@ System.register("ionic-typescript/decorators", [], function(exports_1, context_1
             }
         };
     }
-    exports_1("App", App);
+    exports_2("App", App);
     /**
      * Declare UIRouter state with decorated class as controller.
      * @link https://angular-ui.github.io/ui-router/site/#/api/ui.router
@@ -343,7 +511,7 @@ System.register("ionic-typescript/decorators", [], function(exports_1, context_1
                 }]);
         };
     }
-    exports_1("Page", Page);
+    exports_2("Page", Page);
     function resolveModule(module) {
         return (angular.isString(module)
             ? angular.module(module)
@@ -356,10 +524,10 @@ System.register("ionic-typescript/decorators", [], function(exports_1, context_1
     }
 });
 /// <reference path="typings.d.ts" />
-System.register("ts/app", ["ionic-typescript/decorators"], function(exports_2, context_2) {
+System.register("ts/app", ["ionic-typescript/decorators", "angular-openiddict/openIddictHttpService"], function(exports_3, context_3) {
     "use strict";
-    var __moduleName = context_2 && context_2.id;
-    var decorators_1;
+    var __moduleName = context_3 && context_3.id;
+    var decorators_1, openIddictHttpService_1;
     var IonicApplication, IonicApplicationConfig;
     var exportedNames_1 = {
         'IonicApplication': true
@@ -369,16 +537,21 @@ System.register("ts/app", ["ionic-typescript/decorators"], function(exports_2, c
         for(var n in m) {
             if (n !== "default"&& !exportedNames_1.hasOwnProperty(n)) exports[n] = m[n];
         }
-        exports_2(exports);
+        exports_3(exports);
     }
     return {
         setters:[
             function (decorators_2_1) {
                 exportStar_1(decorators_2_1);
                 decorators_1 = decorators_2_1;
+            },
+            function (openIddictHttpService_1_1) {
+                openIddictHttpService_1 = openIddictHttpService_1_1;
             }],
         execute: function() {
-            exports_2("IonicApplication", IonicApplication = angular.module("app", ["ionic"]));
+            exports_3("IonicApplication", IonicApplication = angular.module("app", ["ionic"]));
+            IonicApplication.service("openIddictHttpService", openIddictHttpService_1.OpenIddictHttpService);
+            IonicApplication.constant("openIddictHttpServiceSettings", {});
             IonicApplicationConfig = (function () {
                 function IonicApplicationConfig(ionicPlatform) {
                     this.ionicPlatform = ionicPlatform;
@@ -402,9 +575,9 @@ System.register("ts/app", ["ionic-typescript/decorators"], function(exports_2, c
         }
     }
 });
-System.register("ts/pages/forgotPassword", ["ts/app"], function(exports_3, context_3) {
+System.register("ts/pages/forgotPassword", ["ts/app"], function(exports_4, context_4) {
     "use strict";
-    var __moduleName = context_3 && context_3.id;
+    var __moduleName = context_4 && context_4.id;
     var app_1;
     var ForgotPasswordController;
     return {
@@ -427,13 +600,13 @@ System.register("ts/pages/forgotPassword", ["ts/app"], function(exports_3, conte
                 ], ForgotPasswordController);
                 return ForgotPasswordController;
             }());
-            exports_3("ForgotPasswordController", ForgotPasswordController);
+            exports_4("ForgotPasswordController", ForgotPasswordController);
         }
     }
 });
-System.register("ts/pages/login", ["ts/app"], function(exports_4, context_4) {
+System.register("ts/pages/login", ["ts/app"], function(exports_5, context_5) {
     "use strict";
-    var __moduleName = context_4 && context_4.id;
+    var __moduleName = context_5 && context_5.id;
     var app_2;
     var LoginController;
     return {
@@ -443,26 +616,36 @@ System.register("ts/pages/login", ["ts/app"], function(exports_4, context_4) {
             }],
         execute: function() {
             LoginController = (function () {
-                function LoginController() {
+                function LoginController(_logService, _openIddictHttpService) {
+                    this._logService = _logService;
+                    this._openIddictHttpService = _openIddictHttpService;
                 }
-                LoginController.prototype.login = function (name, password) {
-                    console.log(name, password);
+                LoginController.prototype.register = function (username, password) {
+                    this._openIddictHttpService.login(username, password)
+                        .then(function (response) {
+                        console.log(response);
+                    })
+                        .catch(function (response) {
+                        console.log(response);
+                    });
                 };
                 LoginController = __decorate([
                     app_2.Page(app_2.IonicApplication, "login", {
                         template: "\n        <ion-view title=\"Login\">\n            <ion-nav-bar class=\"bar-balanced\">\n                <ion-nav-back-button>\n                </ion-nav-back-button>\n            </ion-nav-bar>\n            <ion-content padding=\"true\" scroll=\"false\">\n                <label class=\"item item-input\" style=\"margin-bottom: 40px;\">\n                    <span class=\"input-label\">Name</span>\n                    <input type=\"text\" ng-model=\"name\">\n                </label>\n                <label class=\"item item-input\" style=\"margin-bottom: 40px;\">\n                    <span class=\"input-label\">Password</span>\n                    <input type=\"password\" ng-model=\"password\">\n                </label>\n                <button type=\"submit\" class=\"button button-calm button-block\" ng-click=\"$ctrl.login(name, password)\">\n                    Login\n                </button>\n            </ion-content>\n        </ion-view>\n    "
-                    }), 
-                    __metadata('design:paramtypes', [])
+                    }),
+                    __param(0, app_2.Inject("$log")),
+                    __param(1, app_2.Inject("openIddictHttpService")), 
+                    __metadata('design:paramtypes', [Object, Object])
                 ], LoginController);
                 return LoginController;
             }());
-            exports_4("LoginController", LoginController);
+            exports_5("LoginController", LoginController);
         }
     }
 });
-System.register("ts/pages/register", ["ts/app"], function(exports_5, context_5) {
+System.register("ts/pages/register", ["ts/app"], function(exports_6, context_6) {
     "use strict";
-    var __moduleName = context_5 && context_5.id;
+    var __moduleName = context_6 && context_6.id;
     var app_3;
     var RegisterController;
     return {
@@ -472,142 +655,30 @@ System.register("ts/pages/register", ["ts/app"], function(exports_5, context_5) 
             }],
         execute: function() {
             RegisterController = (function () {
-                function RegisterController() {
+                function RegisterController(_logService, _openIddictHttpService) {
+                    this._logService = _logService;
+                    this._openIddictHttpService = _openIddictHttpService;
                 }
-                RegisterController.prototype.register = function (name, password) {
-                    console.log(name, password);
+                RegisterController.prototype.register = function (username, password) {
+                    this._openIddictHttpService.register(username, password)
+                        .then(function (response) {
+                        console.log(response);
+                    })
+                        .catch(function (response) {
+                        console.log(response);
+                    });
                 };
                 RegisterController = __decorate([
                     app_3.Page(app_3.IonicApplication, "register", {
-                        template: "\n        <ion-view title=\"Register\">\n            <ion-nav-bar class=\"bar-balanced\">\n                <ion-nav-back-button>\n                </ion-nav-back-button>\n            </ion-nav-bar>\n            <ion-content padding=\"true\" scroll=\"false\">\n                <label class=\"item item-input\" style=\"margin-bottom: 40px;\">\n                    <span class=\"input-label\">Name</span>\n                    <input type=\"text\" ng-model=\"name\">\n                </label>\n                <label class=\"item item-input\" style=\"margin-bottom: 40px;\">\n                    <span class=\"input-label\">Password</span>\n                    <input type=\"password\" ng-model=\"password\">\n                </label>\n                <button type=\"submit\" class=\"button button-calm button-block\" ng-click=\"$ctrl.register(name, password)\">\n                    Register\n                </button>\n            </ion-content>\n        </ion-view>\n    "
-                    }), 
-                    __metadata('design:paramtypes', [])
+                        template: "\n        <ion-view title=\"Register\">\n            <ion-nav-bar class=\"bar-balanced\">\n                <ion-nav-back-button>\n                </ion-nav-back-button>\n            </ion-nav-bar>\n            <ion-content padding=\"true\" scroll=\"false\">\n                <label class=\"item item-input\" style=\"margin-bottom: 40px;\">\n                    <span class=\"input-label\">Name</span>\n                    <input type=\"text\" ng-model=\"name\">\n                </label>\n                <label class=\"item item-input\" style=\"margin-bottom: 40px;\">\n                    <span class=\"input-label\">Password</span>\n                    <input type=\"password\" ng-model=\"password\">\n                </label>\n                <button type=\"submit\" class=\"button button-calm button-block\" ng-click=\"$ctrl.register(name, password)\">\n                    Register\n                </button>\n            </ion-content>\n        </ion-view>\n    ",
+                    }),
+                    __param(0, app_3.Inject("$log")),
+                    __param(1, app_3.Inject("openIddictHttpService")), 
+                    __metadata('design:paramtypes', [Object, Object])
                 ], RegisterController);
                 return RegisterController;
             }());
-            exports_5("RegisterController", RegisterController);
-        }
-    }
-});
-System.register("ts/services/openIdHttpService", ["ts/app"], function(exports_6, context_6) {
-    "use strict";
-    var __moduleName = context_6 && context_6.id;
-    var app_4;
-    var OpenIdHttpService;
-    return {
-        setters:[
-            function (app_4_1) {
-                app_4 = app_4_1;
-            }],
-        execute: function() {
-            OpenIdHttpService = (function () {
-                function OpenIdHttpService(_httpService, _windowService, _qService) {
-                    this._httpService = _httpService;
-                    this._windowService = _windowService;
-                    this._qService = _qService;
-                }
-                OpenIdHttpService.prototype.login = function (username, password) {
-                    var _this = this;
-                    return this._qService(function (resolve, reject) {
-                        return _this._httpService({
-                            method: "POST",
-                            url: "token",
-                            data: {
-                                username: username,
-                                password: password,
-                                grant_type: "password"
-                            },
-                            transformRequest: function (obj) {
-                                var str = [];
-                                for (var p in obj) {
-                                    str.push(encodeURIComponent(p) + "=" + encodeURIComponent(obj[p]));
-                                }
-                                return str.join("&");
-                            }
-                        })
-                            .success(function (data, status, headers, config) {
-                            if (data.error) {
-                                _this._windowService.localStorage.setItem("token", JSON.stringify(data));
-                                resolve([false, [data.error_description]]);
-                            }
-                            else {
-                                _this._windowService.localStorage.setItem("token", JSON.stringify(data));
-                                resolve([true, null]);
-                            }
-                        }).error(function (data, status, headers, config) {
-                            reject([false, ["There was a server communication error."]]);
-                        });
-                    });
-                };
-                OpenIdHttpService.prototype.request = function (config) {
-                    return null;
-                };
-                OpenIdHttpService.prototype.get = function (url, config) {
-                    return null;
-                };
-                OpenIdHttpService.prototype.delete = function (url, config) {
-                    return null;
-                };
-                OpenIdHttpService.prototype.head = function (url, config) {
-                    return null;
-                };
-                OpenIdHttpService.prototype.jsonp = function (url, config) {
-                    return null;
-                };
-                OpenIdHttpService.prototype.post = function (url, data, config) {
-                    return null;
-                };
-                OpenIdHttpService.prototype.put = function (url, data, config) {
-                    return null;
-                };
-                OpenIdHttpService.prototype.patch = function (url, data, config) {
-                    return null;
-                };
-                OpenIdHttpService.prototype.addTokenHeader = function (config) {
-                    var token = this._windowService.localStorage.getItem("token");
-                    if (config === null) {
-                        return {
-                            headers: {
-                                "Authorization": "Token " + token.access_token,
-                                "Content-Type": "application/x-www-form-urlencoded"
-                            }
-                        };
-                    }
-                };
-                OpenIdHttpService.prototype.reloadTokenIfNeeded = function () {
-                    var currentTime = new Date().getTime();
-                    var token = this._windowService.localStorage.getItem("token");
-                    if (currentTime < token.expires_at) {
-                        return this._qService.resolve(token);
-                    }
-                    this._httpService({
-                        method: "POST",
-                        url: "token",
-                        data: {
-                            refresh_token: token.refresh_token,
-                            grant_type: "refresh_token",
-                            scope: "offline_access"
-                        },
-                        transformRequest: function (obj) {
-                            var str = [];
-                            for (var p in obj) {
-                                str.push(encodeURIComponent(p) + "=" + encodeURIComponent(obj[p]));
-                            }
-                            return str.join("&");
-                        }
-                    });
-                    return this._qService.resolve(null);
-                };
-                OpenIdHttpService = __decorate([
-                    app_4.Service(app_4.IonicApplication, "openIdHttpService"),
-                    __param(0, app_4.Inject("$http")),
-                    __param(1, app_4.Inject("$window")),
-                    __param(2, app_4.Inject("$q")), 
-                    __metadata('design:paramtypes', [Function, Object, Function])
-                ], OpenIdHttpService);
-                return OpenIdHttpService;
-            }());
-            exports_6("OpenIdHttpService", OpenIdHttpService);
+            exports_6("RegisterController", RegisterController);
         }
     }
 });

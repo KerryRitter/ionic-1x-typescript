@@ -2,8 +2,14 @@
 
 export * from "../ionic-typescript/decorators";
 import { App, Requires, Run, Inject } from "../ionic-typescript/decorators";
+import { OpenIddictHttpService } from "../angular-openiddict/openIddictHttpService";
 
 export const IonicApplication = angular.module("app", ["ionic"]);
+
+IonicApplication.service("openIddictHttpService", OpenIddictHttpService);
+IonicApplication.constant("openIddictHttpServiceSettings", {
+    
+} as IOpenIddictHttpServiceSettings);
 
 @Run(IonicApplication)
 class IonicApplicationConfig {
