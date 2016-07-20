@@ -70,84 +70,47 @@ export class OpenIddictHttpService implements IOpenIddictHttpService {
     }
 
     public get<T>(url: string, config?: ng.IRequestShortcutConfig): ng.IHttpPromise<T> {
-        return this.reloadTokenIfNeededThenRequest((token: IOpenIdToken) => {
-            return this._httpService.get<T>(url, this.addTokenHeader(token, config));
-        });
+        return this._httpService.get<T>(url, this.addTokenHeader(config));
     }
 
     public delete<T>(url: string, config?: ng.IRequestShortcutConfig): ng.IHttpPromise<T> {
-        return this.reloadTokenIfNeededThenRequest((token: IOpenIdToken) => {
-            return this._httpService.delete<T>(url, this.addTokenHeader(token, config));
-        });
+        return this._httpService.delete<T>(url, this.addTokenHeader(config));
     }
 
     public head<T>(url: string, config?: ng.IRequestShortcutConfig): ng.IHttpPromise<T> {
-        return this.reloadTokenIfNeededThenRequest((token: IOpenIdToken) => {
-            return this._httpService.head<T>(url, this.addTokenHeader(token, config));
-        });
+        return this._httpService.head<T>(url, this.addTokenHeader(config));
     }
 
     public jsonp<T>(url: string, config?: ng.IRequestShortcutConfig): ng.IHttpPromise<T> {
-        return this.reloadTokenIfNeededThenRequest((token: IOpenIdToken) => {
-            return this._httpService.jsonp<T>(url, this.addTokenHeader(token, config));
-        });
+        return this._httpService.jsonp<T>(url, this.addTokenHeader(config));
     }
 
     public post<T>(url: string, data: any, config?: ng.IRequestShortcutConfig): ng.IHttpPromise<T> {
-        return this.reloadTokenIfNeededThenRequest((token: IOpenIdToken) => {
-            return this._httpService.post<T>(url, data, this.addTokenHeader(token, config));
-        });
+        return this._httpService.post<T>(url, data, this.addTokenHeader(config));
     }
 
     public put<T>(url: string, data: any, config?: ng.IRequestShortcutConfig): ng.IHttpPromise<T> {
-        return this.reloadTokenIfNeededThenRequest((token: IOpenIdToken) => {
-            return this._httpService.put<T>(url, data, this.addTokenHeader(token, config));
-        });
+        return this._httpService.put<T>(url, data, this.addTokenHeader(config));
     }
 
     public patch<T>(url: string, data: any, config?: ng.IRequestShortcutConfig): ng.IHttpPromise<T> {
-        return this.reloadTokenIfNeededThenRequest((token: IOpenIdToken) => {
-            return this._httpService.patch<T>(url, data, this.addTokenHeader(token, config));
-        });
+        return this._httpService.patch<T>(url, data, this.addTokenHeader(config));
     }
 
-    private addTokenHeader(token: IOpenIdToken, config?: ng.IRequestShortcutConfig): ng.IRequestShortcutConfig {
-        if (config === null) {
-            return {
-                headers: {
-                    "Authorization": `Token ${token.access_token}`,
-                    "Content-Type": "application/x-www-form-urlencoded"
-                }
-            } as ng.IRequestShortcutConfig;
+    private addTokenHeader(config?: ng.IRequestShortcutConfig): ng.IRequestShortcutConfig {
+        if (!config) {
+            config = {};
         }
-    }
 
-    private reloadTokenIfNeededThenRequest<T>(callback: ((token: IOpenIdToken) => ng.IHttpPromise<T>)) {
-        return this._qService((resolve: ng.IQResolveReject<ng.IHttpPromise<T>>, reject: ng.IQResolveReject<any>) => {
-            var currentTime = new Date().getTime();
-            var token = this._windowService.localStorage.getItem("token") as IOpenIdToken;
+        if (!config.headers) {
+            config.headers = {};
+        }
 
-            if (currentTime < token.expires_at) {
-                resolve(callback(token));
-            }
-
-            this._httpService<IOpenIdToken>({
-                method: "POST", 
-                url: this._settings.tokenUrl, 
-                data: { 
-                    refresh_token: token.refresh_token, 
-                    grant_type: "refresh_token",
-                    scope: "offline_access"  
-                }, 
-                transformRequest: this.transformToQueryString
-            })
-            .then((response) => { 
-                resolve(callback(response.data));
-            })
-            .catch((response) => {
-                reject(response);
-            })
-        });
+        var token = this._windowService.localStorage.getItem("token") as IOpenIdToken;
+        config.headers["Authorization"] = `Token ${token.access_token}`;
+        config.headers["Content-Type"] = "application/x-www-form-urlencoded";
+        
+        return config;
     }
 
     private transformToQueryString(obj: any): string {
