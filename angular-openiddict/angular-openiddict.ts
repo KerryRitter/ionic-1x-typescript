@@ -1,4 +1,4 @@
-export const AngularOpenIddict = angular.module("openiddict");
+const AngularOpenIddict = angular.module("openIddict", []);
 
 AngularOpenIddict.value("openIddictConfig", {} as openIddict.IOpenIddictConfig);
 AngularOpenIddict.service("openIddictHttpService", OpenIddictHttpService);

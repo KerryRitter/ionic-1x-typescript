@@ -1,6 +1,7 @@
 import { IonicApplication, Page, Inject } from "../app";
 
 @Page(IonicApplication, "login", {
+    url: "/login",
     template: `
         <ion-view title="Login">
             <ion-nav-bar class="bar-balanced">
@@ -22,7 +23,7 @@ import { IonicApplication, Page, Inject } from "../app";
             </ion-content>
         </ion-view>
     `
-})
+}) 
 export class LoginController {
     public constructor(
         @Inject("$log") private _logService: ng.ILogService,
@@ -30,7 +31,7 @@ export class LoginController {
     ) {
     }
 
-    public register(username: string, password: string) {
+    public login(username: string, password: string) {
         this._openIddictHttpService.login(username, password)
             .then((response) => {
                 console.log(response);

@@ -2,12 +2,15 @@
 
 export * from "../ionic-typescript/decorators";
 import { App, Requires, Run, Inject } from "../ionic-typescript/decorators";
-import { AngularOpenIddict } from "../angular-openiddict/angular-openiddict";
 
-export const IonicApplication = angular.module("app", ["ionic", AngularOpenIddict.name]);
+export const IonicApplication = angular.module("app", ["ionic", "openIddict"]);
+
+IonicApplication.config(["$urlRouterProvider", ($urlRouterProvider) => {
+    $urlRouterProvider.otherwise("/login");
+}]);
 
 @Run(IonicApplication)
-class IonicApplicationConfig {
+class IonicApplicationRun {
     constructor(
         @Inject("$ionicPlatform") private ionicPlatform: ionic.platform.IonicPlatformService,
         @Inject("openIddictConfig") private openIddictConfig: openIddict.IOpenIddictConfig
