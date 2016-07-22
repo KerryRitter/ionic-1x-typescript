@@ -1,36 +1,41 @@
-export class OpenIddictHttpService implements IOpenIddictHttpService {
-    public static $inject = ["$http", "$window", "$q", "openIddictHttpServiceSettings"];
+export const AngularOpenIddict = angular.module("openiddict");
+
+AngularOpenIddict.value("openIddictConfig", {} as openIddict.IOpenIddictConfig);
+AngularOpenIddict.service("openIddictHttpService", OpenIddictHttpService);
+
+class OpenIddictHttpService implements openIddict.IOpenIddictHttpService {
+    public static $inject = ["$http", "$window", "$q", "openIddictConfig"];
     
     public constructor(
         private _httpService: ng.IHttpService,
         private _windowService: ng.IWindowService,
         private _qService: ng.IQService,
-        private _settings: IOpenIddictHttpServiceSettings
+        private _config: openIddict.IOpenIddictConfig
     ) {
     }
 
     public register(username: string, password: string): any {
-        return this._qService((resolve: ng.IQResolveReject<IAuthenticateResponse>, reject: ng.IQResolveReject<any>) => {
-            return this._httpService<IOpenIdToken>({
+        return this._qService((resolve: ng.IQResolveReject<openIddict.IAuthenticateResponse>, reject: ng.IQResolveReject<any>) => {
+            return this._httpService<openIddict.IOpenIdToken>({
                 method: "POST", 
-                url: this._settings.registerUrl, 
+                url: this._config.registerUrl, 
                 data: { 
                     username: username, 
                     password: password, 
                 }
             })
-            .success((data: IOpenIdToken, status: number, headers: ng.IHttpHeadersGetter, config: ng.IRequestConfig) => {
+            .success((data: openIddict.IOpenIdToken, status: number, headers: ng.IHttpHeadersGetter, config: ng.IRequestConfig) => {
                 if (data.error) {
                     resolve({
                         success: false,
                         messages: [data.error_description]
-                    } as IAuthenticateResponse);
+                    } as openIddict.IAuthenticateResponse);
                 } else {
                     this._windowService.localStorage.setItem("token", JSON.stringify(data));
                     resolve({
                         success: true,
                         messages: null
-                    } as IAuthenticateResponse);
+                    } as openIddict.IAuthenticateResponse);
                 }
             }).error((data: any, status: number, headers: ng.IHttpHeadersGetter, config: ng.IRequestConfig) => {
                 reject(data);
@@ -39,10 +44,10 @@ export class OpenIddictHttpService implements IOpenIddictHttpService {
     }
 
     public login(username: string, password: string): any {
-        return this._qService((resolve: ng.IQResolveReject<IAuthenticateResponse>, reject: ng.IQResolveReject<any>) => {
-            return this._httpService<IOpenIdToken>({
+        return this._qService((resolve: ng.IQResolveReject<openIddict.IAuthenticateResponse>, reject: ng.IQResolveReject<any>) => {
+            return this._httpService<openIddict.IOpenIdToken>({
                 method: "POST", 
-                url: this._settings.tokenUrl, 
+                url: this._config.tokenUrl, 
                 data: { 
                     username: username, 
                     password: password, 
@@ -50,18 +55,18 @@ export class OpenIddictHttpService implements IOpenIddictHttpService {
                 }, 
                 transformRequest: this.transformToQueryString
             })
-            .success((data: IOpenIdToken, status: number, headers: ng.IHttpHeadersGetter, config: ng.IRequestConfig) => {
+            .success((data: openIddict.IOpenIdToken, status: number, headers: ng.IHttpHeadersGetter, config: ng.IRequestConfig) => {
                 if (data.error) {
                     resolve({
                         success: false,
                         messages: [data.error_description]
-                    } as IAuthenticateResponse);
+                    } as openIddict.IAuthenticateResponse);
                 } else {
                     this._windowService.localStorage.setItem("token", JSON.stringify(data));
                     resolve({
                         success: true,
                         messages: null
-                    } as IAuthenticateResponse);
+                    } as openIddict.IAuthenticateResponse);
                 }
             }).error((data: any, status: number, headers: ng.IHttpHeadersGetter, config: ng.IRequestConfig) => {
                 reject(data);
@@ -106,7 +111,7 @@ export class OpenIddictHttpService implements IOpenIddictHttpService {
             config.headers = {};
         }
 
-        var token = this._windowService.localStorage.getItem("token") as IOpenIdToken;
+        var token = this._windowService.localStorage.getItem("token") as openIddict.IOpenIdToken;
         config.headers["Authorization"] = `Token ${token.access_token}`;
         config.headers["Content-Type"] = "application/x-www-form-urlencoded";
         

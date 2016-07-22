@@ -10,26 +10,29 @@ var __metadata = (this && this.__metadata) || function (k, v) {
 var __param = (this && this.__param) || function (paramIndex, decorator) {
     return function (target, key) { decorator(target, key, paramIndex); }
 };
-System.register("angular-openiddict/openIddictHttpService", [], function(exports_1, context_1) {
+System.register("angular-openiddict/angular-openiddict", [], function(exports_1, context_1) {
     "use strict";
     var __moduleName = context_1 && context_1.id;
-    var OpenIddictHttpService;
+    var AngularOpenIddict, OpenIddictHttpService;
     return {
         setters:[],
         execute: function() {
+            exports_1("AngularOpenIddict", AngularOpenIddict = angular.module("openiddict"));
+            AngularOpenIddict.value("openIddictConfig", {});
+            AngularOpenIddict.service("openIddictHttpService", OpenIddictHttpService);
             OpenIddictHttpService = (function () {
-                function OpenIddictHttpService(_httpService, _windowService, _qService, _settings) {
+                function OpenIddictHttpService(_httpService, _windowService, _qService, _config) {
                     this._httpService = _httpService;
                     this._windowService = _windowService;
                     this._qService = _qService;
-                    this._settings = _settings;
+                    this._config = _config;
                 }
                 OpenIddictHttpService.prototype.register = function (username, password) {
                     var _this = this;
                     return this._qService(function (resolve, reject) {
                         return _this._httpService({
                             method: "POST",
-                            url: _this._settings.registerUrl,
+                            url: _this._config.registerUrl,
                             data: {
                                 username: username,
                                 password: password,
@@ -59,7 +62,7 @@ System.register("angular-openiddict/openIddictHttpService", [], function(exports
                     return this._qService(function (resolve, reject) {
                         return _this._httpService({
                             method: "POST",
-                            url: _this._settings.tokenUrl,
+                            url: _this._config.tokenUrl,
                             data: {
                                 username: username,
                                 password: password,
@@ -87,82 +90,37 @@ System.register("angular-openiddict/openIddictHttpService", [], function(exports
                     });
                 };
                 OpenIddictHttpService.prototype.get = function (url, config) {
-                    var _this = this;
-                    return this.reloadTokenIfNeededThenRequest(function (token) {
-                        return _this._httpService.get(url, _this.addTokenHeader(token, config));
-                    });
+                    return this._httpService.get(url, this.addTokenHeader(config));
                 };
                 OpenIddictHttpService.prototype.delete = function (url, config) {
-                    var _this = this;
-                    return this.reloadTokenIfNeededThenRequest(function (token) {
-                        return _this._httpService.delete(url, _this.addTokenHeader(token, config));
-                    });
+                    return this._httpService.delete(url, this.addTokenHeader(config));
                 };
                 OpenIddictHttpService.prototype.head = function (url, config) {
-                    var _this = this;
-                    return this.reloadTokenIfNeededThenRequest(function (token) {
-                        return _this._httpService.head(url, _this.addTokenHeader(token, config));
-                    });
+                    return this._httpService.head(url, this.addTokenHeader(config));
                 };
                 OpenIddictHttpService.prototype.jsonp = function (url, config) {
-                    var _this = this;
-                    return this.reloadTokenIfNeededThenRequest(function (token) {
-                        return _this._httpService.jsonp(url, _this.addTokenHeader(token, config));
-                    });
+                    return this._httpService.jsonp(url, this.addTokenHeader(config));
                 };
                 OpenIddictHttpService.prototype.post = function (url, data, config) {
-                    var _this = this;
-                    return this.reloadTokenIfNeededThenRequest(function (token) {
-                        return _this._httpService.post(url, data, _this.addTokenHeader(token, config));
-                    });
+                    return this._httpService.post(url, data, this.addTokenHeader(config));
                 };
                 OpenIddictHttpService.prototype.put = function (url, data, config) {
-                    var _this = this;
-                    return this.reloadTokenIfNeededThenRequest(function (token) {
-                        return _this._httpService.put(url, data, _this.addTokenHeader(token, config));
-                    });
+                    return this._httpService.put(url, data, this.addTokenHeader(config));
                 };
                 OpenIddictHttpService.prototype.patch = function (url, data, config) {
-                    var _this = this;
-                    return this.reloadTokenIfNeededThenRequest(function (token) {
-                        return _this._httpService.patch(url, data, _this.addTokenHeader(token, config));
-                    });
+                    return this._httpService.patch(url, data, this.addTokenHeader(config));
                 };
-                OpenIddictHttpService.prototype.addTokenHeader = function (token, config) {
-                    if (config === null) {
-                        return {
-                            headers: {
-                                "Authorization": "Token " + token.access_token,
-                                "Content-Type": "application/x-www-form-urlencoded"
-                            }
-                        };
+                OpenIddictHttpService.prototype.addTokenHeader = function (config) {
+                    if (!config) {
+                        config = {};
                     }
-                };
-                OpenIddictHttpService.prototype.reloadTokenIfNeededThenRequest = function (callback) {
-                    var _this = this;
-                    return this._qService(function (resolve, reject) {
-                        var currentTime = new Date().getTime();
-                        var token = _this._windowService.localStorage.getItem("token");
-                        if (currentTime < token.expires_at) {
-                            resolve(callback(token));
-                        }
-                        _this._httpService({
-                            method: "POST",
-                            url: _this._settings.tokenUrl,
-                            data: {
-                                refresh_token: token.refresh_token,
-                                grant_type: "refresh_token",
-                                scope: "offline_access"
-                            },
-                            transformRequest: _this.transformToQueryString
-                        })
-                            .then(function (response) {
-                            resolve(callback(response.data));
-                        })
-                            .catch(function (response) {
-                            reject(response);
-                        });
-                    });
+                    if (!config.headers) {
+                        config.headers = {};
+                    }
+                    var token = this._windowService.localStorage.getItem("token");
+                    config.headers["Authorization"] = "Token " + token.access_token;
+                    config.headers["Content-Type"] = "application/x-www-form-urlencoded";
+                    return config;
                 };
                 OpenIddictHttpService.prototype.transformToQueryString = function (obj) {
                     var str = [];
@@ -171,10 +129,9 @@ System.register("angular-openiddict/openIddictHttpService", [], function(exports
                     }
                     return str.join("&");
                 };
-                OpenIddictHttpService.$inject = ["$http", "$window", "$q", "openIddictHttpServiceSettings"];
+                OpenIddictHttpService.$inject = ["$http", "$window", "$q", "openIddictConfig"];
                 return OpenIddictHttpService;
             }());
-            exports_1("OpenIddictHttpService", OpenIddictHttpService);
         }
     }
 });
@@ -524,10 +481,10 @@ System.register("ionic-typescript/decorators", [], function(exports_2, context_2
     }
 });
 /// <reference path="typings.d.ts" />
-System.register("ts/app", ["ionic-typescript/decorators", "angular-openiddict/openIddictHttpService"], function(exports_3, context_3) {
+System.register("ts/app", ["ionic-typescript/decorators", "angular-openiddict/angular-openiddict"], function(exports_3, context_3) {
     "use strict";
     var __moduleName = context_3 && context_3.id;
-    var decorators_1, openIddictHttpService_1;
+    var decorators_1, angular_openiddict_1;
     var IonicApplication, IonicApplicationConfig;
     var exportedNames_1 = {
         'IonicApplication': true
@@ -545,16 +502,18 @@ System.register("ts/app", ["ionic-typescript/decorators", "angular-openiddict/op
                 exportStar_1(decorators_2_1);
                 decorators_1 = decorators_2_1;
             },
-            function (openIddictHttpService_1_1) {
-                openIddictHttpService_1 = openIddictHttpService_1_1;
+            function (angular_openiddict_1_1) {
+                angular_openiddict_1 = angular_openiddict_1_1;
             }],
         execute: function() {
-            exports_3("IonicApplication", IonicApplication = angular.module("app", ["ionic"]));
-            IonicApplication.service("openIddictHttpService", openIddictHttpService_1.OpenIddictHttpService);
-            IonicApplication.constant("openIddictHttpServiceSettings", {});
+            exports_3("IonicApplication", IonicApplication = angular.module("app", ["ionic", angular_openiddict_1.AngularOpenIddict.name]));
             IonicApplicationConfig = (function () {
-                function IonicApplicationConfig(ionicPlatform) {
+                function IonicApplicationConfig(ionicPlatform, openIddictConfig) {
                     this.ionicPlatform = ionicPlatform;
+                    this.openIddictConfig = openIddictConfig;
+                    openIddictConfig.scope = "email profile";
+                    openIddictConfig.registerUrl = "http://localhost:5000/api/account";
+                    openIddictConfig.tokenUrl = "http://localhost:5000/connect/token";
                     ionicPlatform.ready(function () {
                         if (window.cordova && window.cordova.plugins.Keyboard) {
                             window.cordova.plugins.hideKeyboardAccessoryBar(true);
@@ -567,8 +526,9 @@ System.register("ts/app", ["ionic-typescript/decorators", "angular-openiddict/op
                 }
                 IonicApplicationConfig = __decorate([
                     decorators_1.Run(IonicApplication),
-                    __param(0, decorators_1.Inject("$ionicPlatform")), 
-                    __metadata('design:paramtypes', [Object])
+                    __param(0, decorators_1.Inject("$ionicPlatform")),
+                    __param(1, decorators_1.Inject("openIddictConfig")), 
+                    __metadata('design:paramtypes', [Object, Object])
                 ], IonicApplicationConfig);
                 return IonicApplicationConfig;
             }());

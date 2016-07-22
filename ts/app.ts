@@ -2,20 +2,20 @@
 
 export * from "../ionic-typescript/decorators";
 import { App, Requires, Run, Inject } from "../ionic-typescript/decorators";
-import { OpenIddictHttpService } from "../angular-openiddict/openIddictHttpService";
+import { AngularOpenIddict } from "../angular-openiddict/angular-openiddict";
 
-export const IonicApplication = angular.module("app", ["ionic"]);
-
-IonicApplication.service("openIddictHttpService", OpenIddictHttpService);
-IonicApplication.constant("openIddictHttpServiceSettings", {
-    
-} as IOpenIddictHttpServiceSettings);
+export const IonicApplication = angular.module("app", ["ionic", AngularOpenIddict.name]);
 
 @Run(IonicApplication)
 class IonicApplicationConfig {
     constructor(
-        @Inject("$ionicPlatform") private ionicPlatform: ionic.platform.IonicPlatformService
+        @Inject("$ionicPlatform") private ionicPlatform: ionic.platform.IonicPlatformService,
+        @Inject("openIddictConfig") private openIddictConfig: openIddict.IOpenIddictConfig
     ) {
+        openIddictConfig.scope = "email profile";
+        openIddictConfig.registerUrl = "http://localhost:5000/api/account";
+        openIddictConfig.tokenUrl = "http://localhost:5000/connect/token";
+
         ionicPlatform.ready(function() {
             if (window.cordova && (window.cordova.plugins as any).Keyboard) {
                 (window.cordova.plugins as any).hideKeyboardAccessoryBar(true);

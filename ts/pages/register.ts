@@ -26,7 +26,7 @@ import { IonicApplication, Page, Inject} from "../app";
 export class RegisterController {
     public constructor(
         @Inject("$log") private _logService: ng.ILogService,
-        @Inject("openIddictHttpService") private _openIddictHttpService: IOpenIddictHttpService
+        @Inject("openIddictHttpService") private _openIddictHttpService: openIddict.IOpenIddictHttpService
     ) {
     }
 
