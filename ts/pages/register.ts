@@ -23,7 +23,7 @@ import { IonicApplication, Page, Inject} from "../app";
         </ion-view>
     `,
 })
-export class RegisterController {
+export class RegisterPage {
     public constructor(
         @Inject("$log") private _logService: ng.ILogService,
         @Inject("openIddictHttpService") private _openIddictHttpService: openIddict.IOpenIddictHttpService

@@ -34,6 +34,8 @@ export function SideMenu(module: ng.IModule | string, stateName: string, config:
         (module as ng.IModule).config(["$stateProvider", function($stateProvider: ng.ui.IStateProvider) {
             config.template = getTemplateWrapper(config);
 
+            (target as any).__menuStateName = stateName;
+
             $stateProvider.state(stateName, angular.extend({
                 abstract: true,
                 controller: target,

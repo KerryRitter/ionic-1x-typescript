@@ -24,7 +24,7 @@ import { IonicApplication, Page, Inject } from "../app";
         </ion-view>
     `
 }) 
-export class LoginController {
+export class LoginPage {
     public constructor(
         @Inject("$log") private _logService: ng.ILogService,
         @Inject("$state") private _stateService: ng.ui.IStateService,

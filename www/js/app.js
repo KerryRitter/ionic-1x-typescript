@@ -708,6 +708,7 @@ System.register("ionic-typescript/decorators/sideMenu", ["ionic-typescript/resol
             module = resolveModule_16.default(module);
             module.config(["$stateProvider", function ($stateProvider) {
                     config.template = getTemplateWrapper(config);
+                    target.__menuStateName = stateName;
                     $stateProvider.state(stateName, angular.extend({
                         abstract: true,
                         controller: target,
@@ -739,14 +740,14 @@ System.register("ionic-typescript/decorators/sideMenuPage", ["ionic-typescript/r
      * @param {ng.ui.IState} [config = {}] - state config params.
      * @returns {ClassDecorator}
      */
-    function SideMenuPage(module, stateName, config) {
+    function SideMenuPage(module, sideMenu, stateName, config) {
         if (config === void 0) { config = {}; }
         return function (target) {
             module = resolveModule_17.default(module);
             module.config(["$stateProvider", function ($stateProvider) {
                     var url = (" " + config.url).slice(1);
                     delete config.url;
-                    $stateProvider.state(stateName, {
+                    $stateProvider.state(sideMenu.__menuStateName + "." + stateName, {
                         url: url,
                         views: {
                             menuContent: angular.extend({
@@ -998,54 +999,90 @@ System.register("ts/pages/forgotPassword", ["ts/app"], function(exports_26, cont
         }
     }
 });
-System.register("ts/pages/home", ["ts/app"], function(exports_27, context_27) {
+System.register("ts/pages/mainMenu", ["ts/app"], function(exports_27, context_27) {
     "use strict";
     var __moduleName = context_27 && context_27.id;
     var app_3;
-    var HomeController;
+    var MainMenu;
     return {
         setters:[
             function (app_3_1) {
                 app_3 = app_3_1;
             }],
         execute: function() {
-            HomeController = (function () {
-                function HomeController(_logService) {
+            MainMenu = (function () {
+                function MainMenu(_logService) {
                     this._logService = _logService;
-                    this._logService.log("Opened home");
+                    this._logService.log("Opened the main menu page");
                 }
-                HomeController = __decorate([
-                    app_3.SideMenuPage(app_3.IonicApplication, "mainMenu.home", {
-                        url: "/home",
-                        template: "\n        <ion-view view-title=\"Page 1\">\n            <ion-content class=\"padding\">\n                <button class=\"button button-positive button-block\">I'm a home button!</button>\n            </ion-content>\n        </ion-view>\n    "
+                MainMenu = __decorate([
+                    app_3.SideMenu(app_3.IonicApplication, "mainMenu", {
+                        template: "\n        <ion-list>\n            <ion-item menu-close ui-sref=\"mainMenu.page1()\">\n                Manage Songs\n            </ion-item>\n            <ion-item menu-close ui-sref=\"mainMenu.page2()\">\n                Manage Setlists\n            </ion-item>\n        </ion-list>\n    ",
+                        menuHeaderBarClass: "bar-stable",
+                        menuHeaderBarTitle: "Menu",
+                        navBarClass: "bar-positive",
+                        menuTriggerButtonClass: "button-clear"
                     }),
                     __param(0, app_3.Inject("$log")), 
                     __metadata('design:paramtypes', [Object])
-                ], HomeController);
-                return HomeController;
+                ], MainMenu);
+                return MainMenu;
             }());
-            exports_27("HomeController", HomeController);
+            exports_27("MainMenu", MainMenu);
         }
     }
 });
-System.register("ts/pages/login", ["ts/app"], function(exports_28, context_28) {
+System.register("ts/pages/home", ["ts/app", "ts/pages/mainMenu"], function(exports_28, context_28) {
     "use strict";
     var __moduleName = context_28 && context_28.id;
-    var app_4;
-    var LoginController;
+    var app_4, MainMenu_1;
+    var HomePage;
     return {
         setters:[
             function (app_4_1) {
                 app_4 = app_4_1;
+            },
+            function (MainMenu_1_1) {
+                MainMenu_1 = MainMenu_1_1;
             }],
         execute: function() {
-            LoginController = (function () {
-                function LoginController(_logService, _stateService, _openIddictHttpService) {
+            HomePage = (function () {
+                function HomePage(_logService) {
+                    this._logService = _logService;
+                    this._logService.log("Opened home");
+                }
+                HomePage = __decorate([
+                    app_4.SideMenuPage(app_4.IonicApplication, MainMenu_1.MainMenu, "home", {
+                        url: "/home",
+                        template: "\n        <ion-view view-title=\"Page 1\">\n            <ion-content class=\"padding\">\n                <button class=\"button button-positive button-block\">I'm a home button!</button>\n            </ion-content>\n        </ion-view>\n    "
+                    }),
+                    __param(0, app_4.Inject("$log")), 
+                    __metadata('design:paramtypes', [Object])
+                ], HomePage);
+                return HomePage;
+            }());
+            exports_28("HomePage", HomePage);
+        }
+    }
+});
+System.register("ts/pages/login", ["ts/app"], function(exports_29, context_29) {
+    "use strict";
+    var __moduleName = context_29 && context_29.id;
+    var app_5;
+    var LoginPage;
+    return {
+        setters:[
+            function (app_5_1) {
+                app_5 = app_5_1;
+            }],
+        execute: function() {
+            LoginPage = (function () {
+                function LoginPage(_logService, _stateService, _openIddictHttpService) {
                     this._logService = _logService;
                     this._stateService = _stateService;
                     this._openIddictHttpService = _openIddictHttpService;
                 }
-                LoginController.prototype.login = function (username, password) {
+                LoginPage.prototype.login = function (username, password) {
                     console.log(username, password);
                     this._openIddictHttpService.login(username, password)
                         .then(function (response) {
@@ -1055,102 +1092,39 @@ System.register("ts/pages/login", ["ts/app"], function(exports_28, context_28) {
                         console.log(response);
                     });
                 };
-                LoginController = __decorate([
-                    app_4.Page(app_4.IonicApplication, "login", {
+                LoginPage = __decorate([
+                    app_5.Page(app_5.IonicApplication, "login", {
                         url: "/login",
                         template: "\n        <ion-view title=\"Login\">\n            <ion-nav-bar class=\"bar-balanced\">\n                <ion-nav-back-button>\n                </ion-nav-back-button>\n            </ion-nav-bar>\n            <ion-content padding=\"true\" scroll=\"false\" ng-init=\"username = ''; password = '';\">\n                <label class=\"item item-input\" style=\"margin-bottom: 40px;\">\n                    <span class=\"input-label\">Name</span>\n                    <input type=\"text\" ng-model=\"username\">\n                </label>\n                <label class=\"item item-input\" style=\"margin-bottom: 40px;\">\n                    <span class=\"input-label\">Password</span>\n                    <input type=\"password\" ng-model=\"password\">\n                </label>\n                <button type=\"submit\" class=\"button button-calm button-block\" ng-click=\"$ctrl.login(username, password)\">\n                    Login\n                </button>\n            </ion-content>\n        </ion-view>\n    "
                     }),
-                    __param(0, app_4.Inject("$log")),
-                    __param(1, app_4.Inject("$state")),
-                    __param(2, app_4.Inject("openIddictHttpService")), 
+                    __param(0, app_5.Inject("$log")),
+                    __param(1, app_5.Inject("$state")),
+                    __param(2, app_5.Inject("openIddictHttpService")), 
                     __metadata('design:paramtypes', [Object, Object, Object])
-                ], LoginController);
-                return LoginController;
+                ], LoginPage);
+                return LoginPage;
             }());
-            exports_28("LoginController", LoginController);
+            exports_29("LoginPage", LoginPage);
         }
     }
 });
-System.register("ts/pages/mainMenu", ["ts/app"], function(exports_29, context_29) {
-    "use strict";
-    var __moduleName = context_29 && context_29.id;
-    var app_5;
-    var MainMenuController;
-    return {
-        setters:[
-            function (app_5_1) {
-                app_5 = app_5_1;
-            }],
-        execute: function() {
-            MainMenuController = (function () {
-                function MainMenuController(_logService) {
-                    this._logService = _logService;
-                    this._logService.log("Opened the main menu page");
-                }
-                MainMenuController = __decorate([
-                    app_5.SideMenu(app_5.IonicApplication, "mainMenu", {
-                        template: "\n        <ion-list>\n            <ion-item menu-close ui-sref=\"mainMenu.page1()\">\n                Manage Songs\n            </ion-item>\n            <ion-item menu-close ui-sref=\"mainMenu.page2()\">\n                Manage Setlists\n            </ion-item>\n        </ion-list>\n    ",
-                        menuHeaderBarClass: "bar-stable",
-                        menuHeaderBarTitle: "Menu",
-                        navBarClass: "bar-positive",
-                        menuTriggerButtonClass: "button-clear"
-                    }),
-                    __param(0, app_5.Inject("$log")), 
-                    __metadata('design:paramtypes', [Object])
-                ], MainMenuController);
-                return MainMenuController;
-            }());
-            exports_29("MainMenuController", MainMenuController);
-        }
-    }
-});
-System.register("ts/pages/page1", ["ts/app"], function(exports_30, context_30) {
+System.register("ts/pages/register", ["ts/app"], function(exports_30, context_30) {
     "use strict";
     var __moduleName = context_30 && context_30.id;
     var app_6;
-    var Page1Controller;
+    var RegisterPage;
     return {
         setters:[
             function (app_6_1) {
                 app_6 = app_6_1;
             }],
         execute: function() {
-            Page1Controller = (function () {
-                function Page1Controller(_logService) {
-                    this._logService = _logService;
-                    this._logService.log("Opened page 1");
-                }
-                Page1Controller = __decorate([
-                    app_6.SideMenuPage(app_6.IonicApplication, "mainMenu.page1", {
-                        url: "/page1",
-                        template: "\n        <ion-view view-title=\"Page 1\">\n            <ion-content class=\"padding\">\n                <button class=\"button button-positive button-block\">I'm a button!</button>\n            </ion-content>\n        </ion-view>\n    "
-                    }),
-                    __param(0, app_6.Inject("$log")), 
-                    __metadata('design:paramtypes', [Object])
-                ], Page1Controller);
-                return Page1Controller;
-            }());
-            exports_30("Page1Controller", Page1Controller);
-        }
-    }
-});
-System.register("ts/pages/register", ["ts/app"], function(exports_31, context_31) {
-    "use strict";
-    var __moduleName = context_31 && context_31.id;
-    var app_7;
-    var RegisterController;
-    return {
-        setters:[
-            function (app_7_1) {
-                app_7 = app_7_1;
-            }],
-        execute: function() {
-            RegisterController = (function () {
-                function RegisterController(_logService, _openIddictHttpService) {
+            RegisterPage = (function () {
+                function RegisterPage(_logService, _openIddictHttpService) {
                     this._logService = _logService;
                     this._openIddictHttpService = _openIddictHttpService;
                 }
-                RegisterController.prototype.register = function (username, password) {
+                RegisterPage.prototype.register = function (username, password) {
                     this._openIddictHttpService.register(username, password)
                         .then(function (response) {
                         console.log(response);
@@ -1159,17 +1133,17 @@ System.register("ts/pages/register", ["ts/app"], function(exports_31, context_31
                         console.log(response);
                     });
                 };
-                RegisterController = __decorate([
-                    app_7.Page(app_7.IonicApplication, "register", {
+                RegisterPage = __decorate([
+                    app_6.Page(app_6.IonicApplication, "register", {
                         template: "\n        <ion-view title=\"Register\">\n            <ion-nav-bar class=\"bar-balanced\">\n                <ion-nav-back-button>\n                </ion-nav-back-button>\n            </ion-nav-bar>\n            <ion-content padding=\"true\" scroll=\"false\">\n                <label class=\"item item-input\" style=\"margin-bottom: 40px;\">\n                    <span class=\"input-label\">Name</span>\n                    <input type=\"text\" ng-model=\"name\">\n                </label>\n                <label class=\"item item-input\" style=\"margin-bottom: 40px;\">\n                    <span class=\"input-label\">Password</span>\n                    <input type=\"password\" ng-model=\"password\">\n                </label>\n                <button type=\"submit\" class=\"button button-calm button-block\" ng-click=\"$ctrl.register(name, password)\">\n                    Register\n                </button>\n            </ion-content>\n        </ion-view>\n    ",
                     }),
-                    __param(0, app_7.Inject("$log")),
-                    __param(1, app_7.Inject("openIddictHttpService")), 
+                    __param(0, app_6.Inject("$log")),
+                    __param(1, app_6.Inject("openIddictHttpService")), 
                     __metadata('design:paramtypes', [Object, Object])
-                ], RegisterController);
-                return RegisterController;
+                ], RegisterPage);
+                return RegisterPage;
             }());
-            exports_31("RegisterController", RegisterController);
+            exports_30("RegisterPage", RegisterPage);
         }
     }
 });

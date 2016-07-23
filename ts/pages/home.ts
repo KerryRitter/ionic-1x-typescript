@@ -1,6 +1,7 @@
 import { IonicApplication, SideMenuPage, Inject } from "../app";
+import { MainMenu } from "./MainMenu";
 
-@SideMenuPage(IonicApplication, "mainMenu.home", {
+@SideMenuPage(IonicApplication, MainMenu, "home", {
     url: "/home",
     template: `
         <ion-view view-title="Page 1">
@@ -10,7 +11,7 @@ import { IonicApplication, SideMenuPage, Inject } from "../app";
         </ion-view>
     `
 }) 
-export class HomeController {
+export class HomePage {
     public constructor(
         @Inject("$log") private _logService: ng.ILogService
     ) {
