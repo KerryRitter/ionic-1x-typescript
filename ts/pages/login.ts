@@ -8,7 +8,7 @@ import { IonicApplication, Page, Inject } from "../app";
                 <ion-nav-back-button>
                 </ion-nav-back-button>
             </ion-nav-bar>
-            <ion-content padding="true" scroll="false" ng-init="username = ''; password = '';>
+            <ion-content padding="true" scroll="false" ng-init="username = ''; password = '';">
                 <label class="item item-input" style="margin-bottom: 40px;">
                     <span class="input-label">Name</span>
                     <input type="text" ng-model="username">

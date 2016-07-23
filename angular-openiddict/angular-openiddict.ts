@@ -44,7 +44,10 @@ class OpenIddictHttpService implements openIddict.IOpenIddictHttpService {
         return this._qService((resolve: ng.IQResolveReject<openIddict.IAuthenticateResponse>, reject: ng.IQResolveReject<any>) => {
             return this._httpService<openIddict.IOpenIdToken>({
                 method: "POST", 
-                url: this._config.tokenUrl, 
+                url: this._config.tokenUrl,
+                headers: {
+                    "Content-Type": "application/x-www-form-urlencoded"
+                },
                 data: { 
                     username: username, 
                     password: password, 
