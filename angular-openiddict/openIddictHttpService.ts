@@ -1,6 +1,4 @@
-const AngularOpenIddict = angular.module("openIddict", []);
-
-class OpenIddictHttpService implements openIddict.IOpenIddictHttpService {
+export class OpenIddictHttpService implements openIddict.IOpenIddictHttpService {
     public static $inject = ["$http", "$window", "$q", "openIddictConfig"];
     
     public constructor(
@@ -123,6 +121,3 @@ class OpenIddictHttpService implements openIddict.IOpenIddictHttpService {
         return str.join("&");
     }
 }
-
-AngularOpenIddict.value("openIddictConfig", {} as openIddict.IOpenIddictConfig);
-AngularOpenIddict.service("openIddictHttpService", OpenIddictHttpService);

@@ -5,7 +5,7 @@ import {App, Requires, Run, Inject} from "../ionic-typescript/decorators";
 
 export const IonicApplication = angular.module("app", ["ionic", "openIddict"]);
 
-IonicApplication.config(["$urlRouterProvider", ($urlRouterProvider) => {
+IonicApplication.config(["$urlRouterProvider", function ($urlRouterProvider) {
     $urlRouterProvider.otherwise("/login");
 }]);
 

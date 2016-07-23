@@ -8,16 +8,16 @@ import { IonicApplication, Page, Inject } from "../app";
                 <ion-nav-back-button>
                 </ion-nav-back-button>
             </ion-nav-bar>
-            <ion-content padding="true" scroll="false">
+            <ion-content padding="true" scroll="false" ng-init="username = ''; password = '';>
                 <label class="item item-input" style="margin-bottom: 40px;">
                     <span class="input-label">Name</span>
-                    <input type="text" ng-model="name">
+                    <input type="text" ng-model="username">
                 </label>
                 <label class="item item-input" style="margin-bottom: 40px;">
                     <span class="input-label">Password</span>
                     <input type="password" ng-model="password">
                 </label>
-                <button type="submit" class="button button-calm button-block" ng-click="$ctrl.login(name, password)">
+                <button type="submit" class="button button-calm button-block" ng-click="$ctrl.login(username, password)">
                     Login
                 </button>
             </ion-content>
@@ -34,14 +34,12 @@ export class LoginController {
 
     public login(username: string, password: string) {
         console.log(username, password);
-        this._stateService.go("home");
-        return;
-        // this._openIddictHttpService.login(username, password)
-        //     .then((response) => {
-        //         console.log(response);
-        //     })
-        //     .catch((response) => {
-        //         console.log(response);
-        //     });
+        this._openIddictHttpService.login(username, password)
+            .then((response) => {
+                console.log(response);
+            })
+            .catch((response) => {
+                console.log(response);
+            });
     }
 }

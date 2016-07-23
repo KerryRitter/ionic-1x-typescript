@@ -1,6 +1,6 @@
 import { IonicApplication, SideMenuPage, Inject } from "../app";
 
-@SideMenuPage(IonicApplication, "home.page1", {
+@SideMenuPage(IonicApplication, "mainMenu.page1", {
     url: "/page1",
     template: `
         <ion-view view-title="Page 1">

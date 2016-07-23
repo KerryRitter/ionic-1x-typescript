@@ -1,22 +1,19 @@
-import { IonicApplication, SideMenu, Inject } from "../app";
+import { IonicApplication, SideMenuPage, Inject } from "../app";
 
-@SideMenu(IonicApplication, "home", {
+@SideMenuPage(IonicApplication, "mainMenu.home", {
     url: "/home",
     template: `
-        <ion-list>
-            <ion-item menu-close ui-sref="home.page1()">
-                Manage Songs
-            </ion-item>
-            <ion-item menu-close ui-sref="home.page2()">
-                Manage Setlists
-            </ion-item>
-        </ion-list>
+        <ion-view view-title="Page 1">
+            <ion-content class="padding">
+                <button class="button button-positive button-block">I'm a home button!</button>
+            </ion-content>
+        </ion-view>
     `
 }) 
 export class HomeController {
     public constructor(
         @Inject("$log") private _logService: ng.ILogService
     ) {
-        this._logService.log("Opened the home page");
+        this._logService.log("Opened home");
     }
 }

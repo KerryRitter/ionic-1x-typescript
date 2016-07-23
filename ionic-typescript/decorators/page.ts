@@ -13,6 +13,7 @@ export function Page(module: ng.IModule | string, stateName: string, config: ng.
    return function (target: Function) {
       module = resolveModule(module);
       (module as ng.IModule).config(["$stateProvider", function ($stateProvider: ng.ui.IStateProvider) {
+         (window as any).x = $stateProvider;
          $stateProvider
             .state(stateName, angular.extend({
                controller: target,
