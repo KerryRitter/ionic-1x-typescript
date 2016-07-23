@@ -30,7 +30,7 @@ gulp.task('sass', function(done) {
 
 gulp.task('watch', function() {
     gulp.watch(paths.sass, ['sass']);
-    gulp.watch("ts/**/*.ts", ["compile:ts"]);
+    gulp.watch(["ts/**/*.ts", "ionic-typescript/**/*.ts"], ["compile:ts"]);
 });
 
 gulp.task('install', ['git-check'], function() {

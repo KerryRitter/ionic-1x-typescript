@@ -1,7 +1,7 @@
 /// <reference path="typings.d.ts" />
 
 export * from "../ionic-typescript/decorators";
-import { App, Requires, Run, Inject } from "../ionic-typescript/decorators";
+import {App, Requires, Run, Inject} from "../ionic-typescript/decorators";
 
 export const IonicApplication = angular.module("app", ["ionic", "openIddict"]);
 

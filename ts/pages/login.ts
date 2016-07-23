@@ -27,17 +27,21 @@ import { IonicApplication, Page, Inject } from "../app";
 export class LoginController {
     public constructor(
         @Inject("$log") private _logService: ng.ILogService,
+        @Inject("$state") private _stateService: ng.ui.IStateService,
         @Inject("openIddictHttpService") private _openIddictHttpService: openIddict.IOpenIddictHttpService
     ) {
     }
 
     public login(username: string, password: string) {
-        this._openIddictHttpService.login(username, password)
-            .then((response) => {
-                console.log(response);
-            })
-            .catch((response) => {
-                console.log(response);
-            });
+        console.log(username, password);
+        this._stateService.go("home");
+        return;
+        // this._openIddictHttpService.login(username, password)
+        //     .then((response) => {
+        //         console.log(response);
+        //     })
+        //     .catch((response) => {
+        //         console.log(response);
+        //     });
     }
 }
