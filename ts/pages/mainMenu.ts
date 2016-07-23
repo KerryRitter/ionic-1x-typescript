@@ -16,7 +16,7 @@ import { IonicApplication, SideMenu, Inject } from "../app";
     navBarClass: "bar-positive",
     menuTriggerButtonClass: "button-clear"
 } as IonicTypescript.ISideMenuConfig) 
-export class MainMenu {
+export class MainMenu implements IonicTypescript.ISideMenu {
     public constructor(
         @Inject("$log") private _logService: ng.ILogService
     ) {

@@ -19,7 +19,7 @@ import { IonicApplication, Page } from "../app";
         </ion-view>
     `
 })
-export class ForgotPasswordController {
+export class ForgotPasswordController implements IonicTypescript.IPage {
     public forgotPassword(name: string) {
         console.log(name);
     }

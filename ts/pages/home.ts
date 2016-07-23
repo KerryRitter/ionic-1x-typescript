@@ -11,7 +11,7 @@ import { MainMenu } from "./MainMenu";
         </ion-view>
     `
 }) 
-export class HomePage {
+export class HomePage implements IonicTypescript.IPage {
     public constructor(
         @Inject("$log") private _logService: ng.ILogService
     ) {

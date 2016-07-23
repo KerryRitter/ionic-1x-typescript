@@ -9,14 +9,21 @@ import resolveModule from "../resolveModule";
  * @param {ng.ui.IState} [config = {}] - state config params.
  * @returns {ClassDecorator}
  */
-export function SideMenuPage(module: ng.IModule | string, sideMenu: Function, stateName: string, config: ng.ui.IState = {}) {
-    return function (target: Function) {
+export function SideMenuPage(
+    module: ng.IModule | string, 
+    sideMenu: IonicTypescript.ISideMenu, 
+    stateName: string, 
+    config: ng.ui.IState = {}) {
+
+    return function (target: IonicTypescript.IPage) {
         module = resolveModule(module);
         (module as ng.IModule).config(["$stateProvider", function ($stateProvider: ng.ui.IStateProvider) {
             var url = (" " + config.url).slice(1);
             delete config.url;
 
-            $stateProvider.state(`${(sideMenu as any).__menuStateName}.${stateName}`, {
+            target.__stateName = `${sideMenu.__menuStateName}.${stateName}`;
+
+            $stateProvider.state(target.__stateName, {
                 url: url,
                 views: {
                     menuContent: angular.extend({

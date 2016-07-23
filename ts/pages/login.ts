@@ -24,11 +24,12 @@ import { IonicApplication, Page, Inject } from "../app";
         </ion-view>
     `
 }) 
-export class LoginPage {
+export class LoginPage implements IonicTypescript.IPage {
     public constructor(
         @Inject("$log") private _logService: ng.ILogService,
         @Inject("$state") private _stateService: ng.ui.IStateService,
-        @Inject("openIddictHttpService") private _openIddictHttpService: openIddict.IOpenIddictHttpService
+        @Inject("openIddictHttpService") private _openIddictHttpService: openIddict.IOpenIddictHttpService,
+        @Inject("navController") private _nav: IonicTypescript.NavController
     ) {
     }
 

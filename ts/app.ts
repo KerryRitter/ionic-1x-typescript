@@ -3,7 +3,7 @@
 export * from "../ionic-typescript/decorators";
 import {App, Requires, Run, Inject} from "../ionic-typescript/decorators";
 
-export const IonicApplication = angular.module("app", ["ionic", "openIddict"]);
+export const IonicApplication = angular.module("app", ["ionic", "openIddict", "ionic1-forward"]);
 
 IonicApplication.config(["$urlRouterProvider", function ($urlRouterProvider) {
     $urlRouterProvider.otherwise("/login");

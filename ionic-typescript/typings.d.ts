@@ -5,4 +5,12 @@ declare namespace IonicTypescript {
         navBarClass: string;
         menuTriggerButtonClass: string;
     }
+
+    interface IPage {
+        __stateName?: string;
+    }
+
+    interface ISideMenu {
+        __menuStateName?: string;
+    }
 }

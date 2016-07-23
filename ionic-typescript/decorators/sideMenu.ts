@@ -29,12 +29,12 @@ function getTemplateWrapper(config: IonicTypescript.ISideMenuConfig) {
 }
 
 export function SideMenu(module: ng.IModule | string, stateName: string, config: IonicTypescript.ISideMenuConfig) {
-    return function (target: Function) {
+    return function (target: IonicTypescript.ISideMenu) {
         module = resolveModule(module);
         (module as ng.IModule).config(["$stateProvider", function($stateProvider: ng.ui.IStateProvider) {
             config.template = getTemplateWrapper(config);
 
-            (target as any).__menuStateName = stateName;
+            target.__menuStateName = stateName;
 
             $stateProvider.state(stateName, angular.extend({
                 abstract: true,
