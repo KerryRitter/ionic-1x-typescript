@@ -1,4 +1,5 @@
 import resolveModule from "../resolveModule";
+import {IPage} from "../pageBase";
 
 /**
  * Declare UIRouter state with decorated class as controller.
@@ -10,7 +11,7 @@ import resolveModule from "../resolveModule";
  * @returns {ClassDecorator}
  */
 export function Page(module: ng.IModule | string, stateName: string, config: ng.ui.IState = {}) {
-   return function (target: IonicTypescript.IPage) {
+   return function (target: IPage) {
       module = resolveModule(module);
       (module as ng.IModule).config(["$stateProvider", function ($stateProvider: ng.ui.IStateProvider) {
          target.__stateName = stateName;

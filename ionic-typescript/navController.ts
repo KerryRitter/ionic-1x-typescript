@@ -1,22 +1,33 @@
-namespace IonicTypescript {
-    export class NavController {
-        public static $inject = ["$state", "$ionicHistory"];
+import {IPage} from "./pageBase";
 
-        public constructor(
-            public state: ng.ui.IStateService,
-            public history: ionic.navigation.IonicHistoryService
-        ) {
+export class NavController {
+    public static $inject = ["$state", "$ionicHistory"];
+
+    public constructor(
+        public state: ng.ui.IStateService,
+        public history: ionic.navigation.IonicHistoryService
+    ) {
+    }
+
+    public push(page: IPage, params?: any, options?: ionic.navigation.IonicHistoryNextViewOptions) {
+        if (options) {
+            this.history.nextViewOptions(options);
         }
 
-        public push(page: IonicTypescript.IPage, params: any, options?: ionic.navigation.IonicHistoryNextViewOptions) {
-            if (options) {
-                this.history.nextViewOptions(options)
-            }
-            this.state.go(page.__stateName, params);
+        console.log(this.state.get(), page);
+
+        this.state.go(page.__stateName, params);
+    }
+
+    public pop(params?: any, options?: ionic.navigation.IonicHistoryNextViewOptions) {
+        if (options) {
+            this.history.nextViewOptions(options);
         }
 
-        public pop(backCount?: number) {
-            this.history.goBack(backCount);
-        }
+        this.history.goBack(1);
+    }
+
+    public popMany(backCount?: number) {
+        this.history.goBack(backCount);
     }
 }

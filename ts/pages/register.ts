@@ -1,4 +1,4 @@
-import { IonicApplication, Page, Inject} from "../app";
+import { IonicApplication, Page, Inject, PageBase} from "../app";
 
 @Page(IonicApplication, "register", {
     template: `
@@ -23,11 +23,13 @@ import { IonicApplication, Page, Inject} from "../app";
         </ion-view>
     `,
 })
-export class RegisterPage implements IonicTypescript.IPage {
+export class RegisterPage extends PageBase {
     public constructor(
         @Inject("$log") private _logService: ng.ILogService,
-        @Inject("openIddictHttpService") private _openIddictHttpService: openIddict.IOpenIddictHttpService
+        @Inject("openIddictHttpService") private _openIddictHttpService: openIddict.IOpenIddictHttpService,
+        @Inject("$scope") scope: ng.IScope
     ) {
+        super(scope);
     }
 
     public register(username: string, password: string) {

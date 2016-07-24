@@ -1,12 +1,13 @@
 import resolveModule from "../resolveModule";
+import {ISideMenu, ISideMenuConfig} from "../sideMenuBase";
 
-function getTemplateWrapper(config: IonicTypescript.ISideMenuConfig) {
+function getTemplateWrapper(config: ISideMenuConfig) {
     config.navBarClass = config.navBarClass ? config.navBarClass : "bar-positive";
     config.menuTriggerButtonClass = config.menuTriggerButtonClass ? config.menuTriggerButtonClass : "button-clear";
     config.menuHeaderBarClass = config.menuHeaderBarClass ? config.menuHeaderBarClass : "bar-stable";
     config.menuHeaderBarTitle = config.menuHeaderBarTitle ? config.menuHeaderBarTitle : "Menu";
 
-    return `<ion-side-menus enable-menu-with-back-views="false">
+    return `<ion-side-menus>
                 <ion-side-menu-content>
                     <ion-nav-bar class="${config.navBarClass}">
                         <ion-nav-back-button>
@@ -28,8 +29,8 @@ function getTemplateWrapper(config: IonicTypescript.ISideMenuConfig) {
             </ion-side-menus>`;
 }
 
-export function SideMenu(module: ng.IModule | string, stateName: string, config: IonicTypescript.ISideMenuConfig) {
-    return function (target: IonicTypescript.ISideMenu) {
+export function SideMenu(module: ng.IModule | string, stateName: string, config: ISideMenuConfig) {
+    return function (target: ISideMenu) {
         module = resolveModule(module);
         (module as ng.IModule).config(["$stateProvider", function($stateProvider: ng.ui.IStateProvider) {
             config.template = getTemplateWrapper(config);

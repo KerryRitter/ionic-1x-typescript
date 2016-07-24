@@ -1,6 +1,10 @@
 /// <reference path="typings.d.ts" />
 
 export * from "../ionic-typescript/decorators";
+export {PageBase} from "../ionic-typescript/pageBase";
+export {SideMenuBase, ISideMenuConfig} from "../ionic-typescript/sideMenuBase";
+export {NavController} from "../ionic-typescript/navController";
+
 import {App, Requires, Run, Inject} from "../ionic-typescript/decorators";
 
 export const IonicApplication = angular.module("app", ["ionic", "openIddict", "ionic1-forward"]);

@@ -1,4 +1,5 @@
-import { IonicApplication, Page, Inject } from "../app";
+import { IonicApplication, Page, Inject, PageBase, NavController } from "../app";
+import { HomePage } from "./home";
 
 @Page(IonicApplication, "login", {
     url: "/login",
@@ -24,23 +25,27 @@ import { IonicApplication, Page, Inject } from "../app";
         </ion-view>
     `
 }) 
-export class LoginPage implements IonicTypescript.IPage {
+export class LoginPage extends PageBase {
     public constructor(
         @Inject("$log") private _logService: ng.ILogService,
         @Inject("$state") private _stateService: ng.ui.IStateService,
         @Inject("openIddictHttpService") private _openIddictHttpService: openIddict.IOpenIddictHttpService,
-        @Inject("navController") private _nav: IonicTypescript.NavController
+        @Inject("navController") private _nav: NavController,
+        @Inject("$scope") scope: ng.IScope
     ) {
+        super(scope);
+        (window as any).state = _stateService;
     }
 
     public login(username: string, password: string) {
         console.log(username, password);
-        this._openIddictHttpService.login(username, password)
-            .then((response) => {
-                console.log(response);
-            })
-            .catch((response) => {
-                console.log(response);
-            });
+        this._nav.push(HomePage);
+        // this._openIddictHttpService.login(username, password)
+        //     .then((response) => {
+        //         console.log(response);
+        //     })
+        //     .catch((response) => {
+        //         console.log(response);
+        //     });
     }
 }

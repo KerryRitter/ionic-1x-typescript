@@ -1,6 +1,6 @@
-import { IonicApplication, Page } from "../app";
+import { IonicApplication, Page, Inject, PageBase } from "../app";
 
-@Page(IonicApplication, "register", {
+@Page(IonicApplication, "forgotPassword", {
     template: `
         <ion-view title="Register">
             <ion-nav-bar class="bar-balanced">
@@ -19,7 +19,13 @@ import { IonicApplication, Page } from "../app";
         </ion-view>
     `
 })
-export class ForgotPasswordController implements IonicTypescript.IPage {
+export class ForgotPasswordController extends PageBase {
+    public constructor(
+        @Inject("$scope") scope: ng.IScope
+    ) {
+        super(scope);
+    }
+
     public forgotPassword(name: string) {
         console.log(name);
     }

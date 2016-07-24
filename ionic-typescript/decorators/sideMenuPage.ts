@@ -1,4 +1,6 @@
 import resolveModule from "../resolveModule";
+import {IPage} from "../pageBase";
+import {SideMenuBase} from "../sideMenuBase";
 
 /**
  * Declare UIRouter state with decorated class as controller.
@@ -11,19 +13,22 @@ import resolveModule from "../resolveModule";
  */
 export function SideMenuPage(
     module: ng.IModule | string, 
-    sideMenu: IonicTypescript.ISideMenu, 
+    sideMenu: SideMenuBase | string, 
     stateName: string, 
     config: ng.ui.IState = {}) {
 
-    return function (target: IonicTypescript.IPage) {
+    return function (target: IPage) {
         module = resolveModule(module);
         (module as ng.IModule).config(["$stateProvider", function ($stateProvider: ng.ui.IStateProvider) {
             var url = (" " + config.url).slice(1);
             delete config.url;
+            if (typeof sideMenu === "string") {
+                target.__stateName = `${sideMenu}.${stateName}`;
+            } else {
+                target.__stateName = `${sideMenu.__menuStateName}.${stateName}`;
+            }
 
-            target.__stateName = `${sideMenu.__menuStateName}.${stateName}`;
-
-            $stateProvider.state(target.__stateName, {
+            var stateProperties = {
                 url: url,
                 views: {
                     menuContent: angular.extend({
@@ -31,7 +36,9 @@ export function SideMenuPage(
                         controllerAs: "$ctrl"
                     }, config)
                 }
-            });
+            } as ng.ui.IState;
+
+            $stateProvider.state(target.__stateName, stateProperties);
         }]);
     };
 }
