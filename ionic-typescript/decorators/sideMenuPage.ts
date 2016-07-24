@@ -21,7 +21,11 @@ export function SideMenuPage(
         module = resolveModule(module);
         (module as ng.IModule).config(["$stateProvider", function ($stateProvider: ng.ui.IStateProvider) {
             var url = (" " + config.url).slice(1);
+            var params = config.params;
+
             delete config.url;
+            delete config.params;
+
             if (typeof sideMenu === "string") {
                 target.__stateName = `${sideMenu}.${stateName}`;
             } else {
@@ -30,6 +34,7 @@ export function SideMenuPage(
 
             var stateProperties = {
                 url: url,
+                params: params,
                 views: {
                     menuContent: angular.extend({
                         controller: target,

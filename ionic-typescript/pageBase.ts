@@ -6,12 +6,29 @@ export abstract class PageBase implements IPage {
     public constructor(
         private scope: ng.IScope
     ) {
-        scope.$on("$ionicView.loaded", this.ionViewLoaded);
-        scope.$on("$ionicView.enter", this.ionViewDidEnter);
-        scope.$on("$ionicView.leave", this.ionViewDidLeave);
-        scope.$on("$ionicView.beforeEnter", this.ionViewWillEnter);
-        scope.$on("$ionicView.beforeLeave", this.ionViewWillLeave);
-        scope.$on("$ionicView.unloaded", this.ionViewDidUnload);
+        scope.$on("$ionicView.loaded", (event: ng.IAngularEvent, data: any) => {
+            this.ionViewLoaded(event, data);
+        });
+
+        scope.$on("$ionicView.enter", (event: ng.IAngularEvent, data: any) => {
+            this.ionViewDidEnter(event, data);
+        });
+
+        scope.$on("$ionicView.leave", (event: ng.IAngularEvent, data: any) => {
+            this.ionViewDidLeave(event, data);
+        });
+
+        scope.$on("$ionicView.beforeEnter", (event: ng.IAngularEvent, data: any) => {
+            this.ionViewWillEnter(event, data);
+        });
+
+        scope.$on("$ionicView.beforeLeave", (event: ng.IAngularEvent, data: any) => {
+            this.ionViewWillLeave(event, data);
+        });
+
+        scope.$on("$ionicView.unloaded", (event: ng.IAngularEvent, data: any) => {
+            this.ionViewDidUnload(event, data);
+        });
     }
 
     public ionViewLoaded(event: ng.IAngularEvent, data: any) {

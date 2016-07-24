@@ -1,4 +1,5 @@
 import { IonicApplication, SideMenuPage, Inject, PageBase, NavController } from "../app";
+import { CigarService } from "../services/cigarService";
 
 @SideMenuPage(IonicApplication, "mainMenu", "createCigar", {
     url: "/createCigar",
@@ -22,6 +23,6 @@ export class CreateCigarPage extends PageBase {
     }
 
     public save() {
-        this._nav.pop({something: 1});
+        this._nav.pop({cigar: { name: "test" }}, { historyRoot: true });
     }
 }

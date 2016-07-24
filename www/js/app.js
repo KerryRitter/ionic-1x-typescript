@@ -15,140 +15,178 @@ var __extends = (this && this.__extends) || function (d, b) {
     function __() { this.constructor = d; }
     d.prototype = b === null ? Object.create(b) : (__.prototype = b.prototype, new __());
 };
-var AngularOpenIddict = angular.module("openIddict", []);
-var OpenIddictHttpService = (function () {
-    function OpenIddictHttpService(_httpService, _windowService, _qService, _config) {
-        this._httpService = _httpService;
-        this._windowService = _windowService;
-        this._qService = _qService;
-        this._config = _config;
-    }
-    OpenIddictHttpService.prototype.register = function (username, password) {
-        var _this = this;
-        return this._qService(function (resolve, reject) {
-            return _this._httpService({
-                method: "POST",
-                url: _this._config.registerUrl,
-                data: {
-                    username: username,
-                    password: password,
-                }
-            })
-                .success(function (data, status, headers, config) {
-                if (data.error) {
-                    resolve({
-                        success: false,
-                        messages: [data.error_description]
-                    });
-                }
-                else {
-                    _this._windowService.localStorage.setItem("token", JSON.stringify(data));
-                    resolve({
-                        success: true,
-                        messages: null
-                    });
-                }
-            }).error(function (data, status, headers, config) {
-                reject(data);
-            });
-        });
-    };
-    OpenIddictHttpService.prototype.login = function (username, password) {
-        var _this = this;
-        return this._qService(function (resolve, reject) {
-            return _this._httpService({
-                method: "POST",
-                url: _this._config.tokenUrl,
-                headers: {
-                    "Content-Type": "application/x-www-form-urlencoded"
-                },
-                data: {
-                    username: username,
-                    password: password,
-                    grant_type: "password"
-                },
-                transformRequest: _this.transformToQueryString
-            })
-                .success(function (data, status, headers, config) {
-                if (data.error) {
-                    resolve({
-                        success: false,
-                        messages: [data.error_description]
-                    });
-                }
-                else {
-                    _this._windowService.localStorage.setItem("token", JSON.stringify(data));
-                    resolve({
-                        success: true,
-                        messages: null
-                    });
-                }
-            }).error(function (data, status, headers, config) {
-                reject(data);
-            });
-        });
-    };
-    OpenIddictHttpService.prototype.get = function (url, config) {
-        return this._httpService.get(url, this.addTokenHeader(config));
-    };
-    OpenIddictHttpService.prototype.delete = function (url, config) {
-        return this._httpService.delete(url, this.addTokenHeader(config));
-    };
-    OpenIddictHttpService.prototype.head = function (url, config) {
-        return this._httpService.head(url, this.addTokenHeader(config));
-    };
-    OpenIddictHttpService.prototype.jsonp = function (url, config) {
-        return this._httpService.jsonp(url, this.addTokenHeader(config));
-    };
-    OpenIddictHttpService.prototype.post = function (url, data, config) {
-        return this._httpService.post(url, data, this.addTokenHeader(config));
-    };
-    OpenIddictHttpService.prototype.put = function (url, data, config) {
-        return this._httpService.put(url, data, this.addTokenHeader(config));
-    };
-    OpenIddictHttpService.prototype.patch = function (url, data, config) {
-        return this._httpService.patch(url, data, this.addTokenHeader(config));
-    };
-    OpenIddictHttpService.prototype.addTokenHeader = function (config) {
-        if (!config) {
-            config = {};
-        }
-        if (!config.headers) {
-            config.headers = {};
-        }
-        var token = this._windowService.localStorage.getItem("token");
-        config.headers["Authorization"] = "Token " + token.access_token;
-        config.headers["Content-Type"] = "application/x-www-form-urlencoded";
-        return config;
-    };
-    OpenIddictHttpService.prototype.transformToQueryString = function (obj) {
-        var str = [];
-        for (var p in obj) {
-            str.push(encodeURIComponent(p) + "=" + encodeURIComponent(obj[p]));
-        }
-        return str.join("&");
-    };
-    OpenIddictHttpService.$inject = ["$http", "$window", "$q", "openIddictConfig"];
-    return OpenIddictHttpService;
-}());
-AngularOpenIddict.value("openIddictConfig", {});
-AngularOpenIddict.service("openIddictHttpService", OpenIddictHttpService);
-System.register("ionic-typescript/pageBase", [], function(exports_1, context_1) {
+System.register("angular-openiddict/service", [], function(exports_1, context_1) {
     "use strict";
     var __moduleName = context_1 && context_1.id;
+    var OpenIddictHttpService;
+    return {
+        setters:[],
+        execute: function() {
+            OpenIddictHttpService = (function () {
+                function OpenIddictHttpService(_httpService, _windowService, _qService, _config) {
+                    this._httpService = _httpService;
+                    this._windowService = _windowService;
+                    this._qService = _qService;
+                    this._config = _config;
+                }
+                OpenIddictHttpService.prototype.register = function (username, password) {
+                    var _this = this;
+                    return this._qService(function (resolve, reject) {
+                        return _this._httpService({
+                            method: "POST",
+                            url: _this._config.registerUrl,
+                            data: {
+                                username: username,
+                                password: password,
+                            }
+                        })
+                            .success(function (data, status, headers, config) {
+                            if (data.error) {
+                                resolve({
+                                    success: false,
+                                    messages: [data.error_description]
+                                });
+                            }
+                            else {
+                                _this._windowService.localStorage.setItem("token", JSON.stringify(data));
+                                resolve({
+                                    success: true,
+                                    messages: null
+                                });
+                            }
+                        }).error(function (data, status, headers, config) {
+                            reject(data);
+                        });
+                    });
+                };
+                OpenIddictHttpService.prototype.login = function (username, password) {
+                    var _this = this;
+                    return this._qService(function (resolve, reject) {
+                        return _this._httpService({
+                            method: "POST",
+                            url: _this._config.tokenUrl,
+                            headers: {
+                                "Content-Type": "application/x-www-form-urlencoded"
+                            },
+                            data: {
+                                username: username,
+                                password: password,
+                                grant_type: "password"
+                            },
+                            transformRequest: _this.transformToQueryString
+                        })
+                            .success(function (data, status, headers, config) {
+                            if (data.error) {
+                                resolve({
+                                    success: false,
+                                    messages: [data.error_description]
+                                });
+                            }
+                            else {
+                                _this._windowService.localStorage.setItem("token", JSON.stringify(data));
+                                resolve({
+                                    success: true,
+                                    messages: null
+                                });
+                            }
+                        }).error(function (data, status, headers, config) {
+                            reject(data);
+                        });
+                    });
+                };
+                OpenIddictHttpService.prototype.get = function (url, config) {
+                    return this._httpService.get(url, this.addTokenHeader(config));
+                };
+                OpenIddictHttpService.prototype.delete = function (url, config) {
+                    return this._httpService.delete(url, this.addTokenHeader(config));
+                };
+                OpenIddictHttpService.prototype.head = function (url, config) {
+                    return this._httpService.head(url, this.addTokenHeader(config));
+                };
+                OpenIddictHttpService.prototype.jsonp = function (url, config) {
+                    return this._httpService.jsonp(url, this.addTokenHeader(config));
+                };
+                OpenIddictHttpService.prototype.post = function (url, data, config) {
+                    return this._httpService.post(url, data, this.addTokenHeader(config));
+                };
+                OpenIddictHttpService.prototype.put = function (url, data, config) {
+                    return this._httpService.put(url, data, this.addTokenHeader(config));
+                };
+                OpenIddictHttpService.prototype.patch = function (url, data, config) {
+                    return this._httpService.patch(url, data, this.addTokenHeader(config));
+                };
+                OpenIddictHttpService.prototype.addTokenHeader = function (config) {
+                    if (!config) {
+                        config = {};
+                    }
+                    if (!config.headers) {
+                        config.headers = {};
+                    }
+                    var token = this._windowService.localStorage.getItem("token");
+                    config.headers["Authorization"] = "Token " + token.access_token;
+                    config.headers["Content-Type"] = "application/x-www-form-urlencoded";
+                    return config;
+                };
+                OpenIddictHttpService.prototype.transformToQueryString = function (obj) {
+                    var str = [];
+                    for (var p in obj) {
+                        str.push(encodeURIComponent(p) + "=" + encodeURIComponent(obj[p]));
+                    }
+                    return str.join("&");
+                };
+                OpenIddictHttpService.$inject = ["$http", "$window", "$q", "openIddictConfig"];
+                return OpenIddictHttpService;
+            }());
+            exports_1("OpenIddictHttpService", OpenIddictHttpService);
+        }
+    }
+});
+System.register("angular-openiddict/angular-openiddict", ["angular-openiddict/service"], function(exports_2, context_2) {
+    "use strict";
+    var __moduleName = context_2 && context_2.id;
+    var service_1;
+    var AngularOpenIddict;
+    return {
+        setters:[
+            function (service_1_1) {
+                service_1 = service_1_1;
+            }],
+        execute: function() {
+            AngularOpenIddict = angular.module("openIddict", []);
+            AngularOpenIddict.value("openIddictConfig", {});
+            AngularOpenIddict.service("openIddictHttpService", service_1.OpenIddictHttpService);
+        }
+    }
+});
+System.register("ionic-typescript/pageBase", [], function(exports_3, context_3) {
+    "use strict";
+    var __moduleName = context_3 && context_3.id;
     var PageBase;
     return {
         setters:[],
         execute: function() {
             PageBase = (function () {
                 function PageBase(scope) {
+                    var _this = this;
                     this.scope = scope;
-                    scope.$on("$ionicView.loaded", this.ionViewLoaded);
-                    scope.$on("$ionicView.enter", this.ionViewDidEnter);
-                    scope.$on("$ionicView.leave", this.ionViewDidLeave);
-                    scope.$on("$ionicView.beforeEnter", this.ionViewWillEnter);
-                    scope.$on("$ionicView.beforeLeave", this.ionViewWillLeave);
-                    scope.$on("$ionicView.unloaded", this.ionViewDidUnload);
+                    scope.$on("$ionicView.loaded", function (event, data) {
+                        _this.ionViewLoaded(event, data);
+                    });
+                    scope.$on("$ionicView.enter", function (event, data) {
+                        _this.ionViewDidEnter(event, data);
+                    });
+                    scope.$on("$ionicView.leave", function (event, data) {
+                        _this.ionViewDidLeave(event, data);
+                    });
+                    scope.$on("$ionicView.beforeEnter", function (event, data) {
+                        _this.ionViewWillEnter(event, data);
+                    });
+                    scope.$on("$ionicView.beforeLeave", function (event, data) {
+                        _this.ionViewWillLeave(event, data);
+                    });
+                    scope.$on("$ionicView.unloaded", function (event, data) {
+                        _this.ionViewDidUnload(event, data);
+                    });
                 }
                 PageBase.prototype.ionViewLoaded = function (event, data) {
                     return null;
@@ -170,48 +208,63 @@ System.register("ionic-typescript/pageBase", [], function(exports_1, context_1) 
                 };
                 return PageBase;
             }());
-            exports_1("PageBase", PageBase);
+            exports_3("PageBase", PageBase);
         }
     }
 });
-System.register("ionic-typescript/navController", [], function(exports_2, context_2) {
+System.register("ionic-typescript/navController", [], function(exports_4, context_4) {
     "use strict";
-    var __moduleName = context_2 && context_2.id;
+    var __moduleName = context_4 && context_4.id;
     var NavController;
     return {
         setters:[],
         execute: function() {
             NavController = (function () {
-                function NavController(state, history) {
+                function NavController(_logService, state, history, _ionicViewSwitcher) {
+                    this._logService = _logService;
                     this.state = state;
                     this.history = history;
+                    this._ionicViewSwitcher = _ionicViewSwitcher;
                 }
                 NavController.prototype.push = function (page, params, options) {
                     if (options) {
                         this.history.nextViewOptions(options);
                     }
-                    console.log(this.state.get(), page);
                     this.state.go(page.__stateName, params);
                 };
                 NavController.prototype.pop = function (params, options) {
+                    var _this = this;
+                    var lastView = this.history.backView();
+                    if (!lastView) {
+                        this._logService.warn("Could not pop state - no last view found.");
+                        return;
+                    }
                     if (options) {
                         this.history.nextViewOptions(options);
                     }
-                    this.history.goBack(1);
+                    this._ionicViewSwitcher.nextDirection("back");
+                    this.state.go(lastView.stateName, params)
+                        .then(function (callback) {
+                        _this.history.removeBackView();
+                    });
                 };
                 NavController.prototype.popMany = function (backCount) {
+                    if (backCount && backCount > 0) {
+                        backCount = backCount * -1;
+                        this._logService.warn("NavController popMany was called with a positive number. Inverting value to " + backCount + ".");
+                    }
                     this.history.goBack(backCount);
                 };
-                NavController.$inject = ["$state", "$ionicHistory"];
+                NavController.$inject = ["$log", "$state", "$ionicHistory", "$ionicViewSwitcher"];
                 return NavController;
             }());
-            exports_2("NavController", NavController);
+            exports_4("NavController", NavController);
         }
     }
 });
-System.register("ionic-typescript/navParams", [], function(exports_3, context_3) {
+System.register("ionic-typescript/navParams", [], function(exports_5, context_5) {
     "use strict";
-    var __moduleName = context_3 && context_3.id;
+    var __moduleName = context_5 && context_5.id;
     var NavParams;
     return {
         setters:[],
@@ -226,13 +279,13 @@ System.register("ionic-typescript/navParams", [], function(exports_3, context_3)
                 NavParams.$inject = ["$state"];
                 return NavParams;
             }());
-            exports_3("NavParams", NavParams);
+            exports_5("NavParams", NavParams);
         }
     }
 });
-System.register("ionic-typescript/ionic1-forward", ["ionic-typescript/navController", "ionic-typescript/navParams"], function(exports_4, context_4) {
+System.register("ionic-typescript/ionic1-forward", ["ionic-typescript/navController", "ionic-typescript/navParams"], function(exports_6, context_6) {
     "use strict";
-    var __moduleName = context_4 && context_4.id;
+    var __moduleName = context_6 && context_6.id;
     var navController_1, navParams_1;
     var Ionic1Forward;
     return {
@@ -250,15 +303,15 @@ System.register("ionic-typescript/ionic1-forward", ["ionic-typescript/navControl
         }
     }
 });
-System.register("ionic-typescript/resolveModule", [], function(exports_5, context_5) {
+System.register("ionic-typescript/resolveModule", [], function(exports_7, context_7) {
     "use strict";
-    var __moduleName = context_5 && context_5.id;
+    var __moduleName = context_7 && context_7.id;
     function resolveModule(module) {
         return (angular.isString(module)
             ? angular.module(module)
             : module);
     }
-    exports_5("default", resolveModule);
+    exports_7("default", resolveModule);
     return {
         setters:[],
         execute: function() {
@@ -266,9 +319,9 @@ System.register("ionic-typescript/resolveModule", [], function(exports_5, contex
         }
     }
 });
-System.register("ionic-typescript/sideMenuBase", [], function(exports_6, context_6) {
+System.register("ionic-typescript/sideMenuBase", [], function(exports_8, context_8) {
     "use strict";
-    var __moduleName = context_6 && context_6.id;
+    var __moduleName = context_8 && context_8.id;
     var SideMenuBase;
     return {
         setters:[],
@@ -278,13 +331,13 @@ System.register("ionic-typescript/sideMenuBase", [], function(exports_6, context
                 }
                 return SideMenuBase;
             }());
-            exports_6("SideMenuBase", SideMenuBase);
+            exports_8("SideMenuBase", SideMenuBase);
         }
     }
 });
-System.register("ionic-typescript/decorators/app", [], function(exports_7, context_7) {
+System.register("ionic-typescript/decorators/app", [], function(exports_9, context_9) {
     "use strict";
-    var __moduleName = context_7 && context_7.id;
+    var __moduleName = context_9 && context_9.id;
     /**
      * Declare angular module with given name.
      * Use @Requires to declare requirements.
@@ -317,16 +370,16 @@ System.register("ionic-typescript/decorators/app", [], function(exports_7, conte
             }
         };
     }
-    exports_7("App", App);
+    exports_9("App", App);
     return {
         setters:[],
         execute: function() {
         }
     }
 });
-System.register("ionic-typescript/decorators/classFactory", ["ionic-typescript/resolveModule"], function(exports_8, context_8) {
+System.register("ionic-typescript/decorators/classFactory", ["ionic-typescript/resolveModule"], function(exports_10, context_10) {
     "use strict";
-    var __moduleName = context_8 && context_8.id;
+    var __moduleName = context_10 && context_10.id;
     var resolveModule_1;
     /**
      * Declare angular factory as class.
@@ -347,7 +400,7 @@ System.register("ionic-typescript/decorators/classFactory", ["ionic-typescript/r
             module.factory(name, factory);
         };
     }
-    exports_8("ClassFactory", ClassFactory);
+    exports_10("ClassFactory", ClassFactory);
     return {
         setters:[
             function (resolveModule_1_1) {
@@ -357,9 +410,9 @@ System.register("ionic-typescript/decorators/classFactory", ["ionic-typescript/r
         }
     }
 });
-System.register("ionic-typescript/decorators/component", ["ionic-typescript/resolveModule"], function(exports_9, context_9) {
+System.register("ionic-typescript/decorators/component", ["ionic-typescript/resolveModule"], function(exports_11, context_11) {
     "use strict";
-    var __moduleName = context_9 && context_9.id;
+    var __moduleName = context_11 && context_11.id;
     var resolveModule_2;
     /**
      * Declare angular component with decorated class as controller.
@@ -375,7 +428,7 @@ System.register("ionic-typescript/decorators/component", ["ionic-typescript/reso
             module.component(name, angular.extend(component || {}, { controller: target }));
         };
     }
-    exports_9("Component", Component);
+    exports_11("Component", Component);
     return {
         setters:[
             function (resolveModule_2_1) {
@@ -385,9 +438,9 @@ System.register("ionic-typescript/decorators/component", ["ionic-typescript/reso
         }
     }
 });
-System.register("ionic-typescript/decorators/config", ["ionic-typescript/resolveModule"], function(exports_10, context_10) {
+System.register("ionic-typescript/decorators/config", ["ionic-typescript/resolveModule"], function(exports_12, context_12) {
     "use strict";
-    var __moduleName = context_10 && context_10.id;
+    var __moduleName = context_12 && context_12.id;
     var resolveModule_3;
     /**
      * Declare angular config clause with decorated class. New instance of decorated class will be instantiated inside config clause.
@@ -407,7 +460,7 @@ System.register("ionic-typescript/decorators/config", ["ionic-typescript/resolve
             module.config(config);
         };
     }
-    exports_10("Config", Config);
+    exports_12("Config", Config);
     return {
         setters:[
             function (resolveModule_3_1) {
@@ -417,9 +470,9 @@ System.register("ionic-typescript/decorators/config", ["ionic-typescript/resolve
         }
     }
 });
-System.register("ionic-typescript/decorators/constant", ["ionic-typescript/resolveModule"], function(exports_11, context_11) {
+System.register("ionic-typescript/decorators/constant", ["ionic-typescript/resolveModule"], function(exports_13, context_13) {
     "use strict";
-    var __moduleName = context_11 && context_11.id;
+    var __moduleName = context_13 && context_13.id;
     var resolveModule_4;
     /**
      * Declare angular constant provider with decorated class.
@@ -434,7 +487,7 @@ System.register("ionic-typescript/decorators/constant", ["ionic-typescript/resol
             module.constant(name, new target());
         };
     }
-    exports_11("Constant", Constant);
+    exports_13("Constant", Constant);
     return {
         setters:[
             function (resolveModule_4_1) {
@@ -444,9 +497,9 @@ System.register("ionic-typescript/decorators/constant", ["ionic-typescript/resol
         }
     }
 });
-System.register("ionic-typescript/decorators/controller", ["ionic-typescript/resolveModule"], function(exports_12, context_12) {
+System.register("ionic-typescript/decorators/controller", ["ionic-typescript/resolveModule"], function(exports_14, context_14) {
     "use strict";
-    var __moduleName = context_12 && context_12.id;
+    var __moduleName = context_14 && context_14.id;
     var resolveModule_5;
     /**
      * Declare angular controller as class.
@@ -461,7 +514,7 @@ System.register("ionic-typescript/decorators/controller", ["ionic-typescript/res
             module.controller(name, target);
         };
     }
-    exports_12("Controller", Controller);
+    exports_14("Controller", Controller);
     return {
         setters:[
             function (resolveModule_5_1) {
@@ -471,9 +524,9 @@ System.register("ionic-typescript/decorators/controller", ["ionic-typescript/res
         }
     }
 });
-System.register("ionic-typescript/decorators/directive", ["ionic-typescript/resolveModule"], function(exports_13, context_13) {
+System.register("ionic-typescript/decorators/directive", ["ionic-typescript/resolveModule"], function(exports_15, context_15) {
     "use strict";
-    var __moduleName = context_13 && context_13.id;
+    var __moduleName = context_15 && context_15.id;
     var resolveModule_6;
     /**
      * Declare angular directive with decorated class as controller.
@@ -491,7 +544,7 @@ System.register("ionic-typescript/decorators/directive", ["ionic-typescript/reso
             });
         };
     }
-    exports_13("Directive", Directive);
+    exports_15("Directive", Directive);
     return {
         setters:[
             function (resolveModule_6_1) {
@@ -501,9 +554,9 @@ System.register("ionic-typescript/decorators/directive", ["ionic-typescript/reso
         }
     }
 });
-System.register("ionic-typescript/decorators/directiveFactory", ["ionic-typescript/resolveModule"], function(exports_14, context_14) {
+System.register("ionic-typescript/decorators/directiveFactory", ["ionic-typescript/resolveModule"], function(exports_16, context_16) {
     "use strict";
-    var __moduleName = context_14 && context_14.id;
+    var __moduleName = context_16 && context_16.id;
     var resolveModule_7;
     /**
      * Declare angular directive with decorated factory method.
@@ -519,7 +572,7 @@ System.register("ionic-typescript/decorators/directiveFactory", ["ionic-typescri
             module.directive(name, target[key]);
         };
     }
-    exports_14("DirectiveFactory", DirectiveFactory);
+    exports_16("DirectiveFactory", DirectiveFactory);
     return {
         setters:[
             function (resolveModule_7_1) {
@@ -529,9 +582,9 @@ System.register("ionic-typescript/decorators/directiveFactory", ["ionic-typescri
         }
     }
 });
-System.register("ionic-typescript/decorators/factory", ["ionic-typescript/resolveModule"], function(exports_15, context_15) {
+System.register("ionic-typescript/decorators/factory", ["ionic-typescript/resolveModule"], function(exports_17, context_17) {
     "use strict";
-    var __moduleName = context_15 && context_15.id;
+    var __moduleName = context_17 && context_17.id;
     var resolveModule_8;
     /**
      * Declare angular factory as factory method.
@@ -546,7 +599,7 @@ System.register("ionic-typescript/decorators/factory", ["ionic-typescript/resolv
             module.factory(name, target[key]);
         };
     }
-    exports_15("Factory", Factory);
+    exports_17("Factory", Factory);
     return {
         setters:[
             function (resolveModule_8_1) {
@@ -556,9 +609,9 @@ System.register("ionic-typescript/decorators/factory", ["ionic-typescript/resolv
         }
     }
 });
-System.register("ionic-typescript/decorators/filter", ["ionic-typescript/resolveModule"], function(exports_16, context_16) {
+System.register("ionic-typescript/decorators/filter", ["ionic-typescript/resolveModule"], function(exports_18, context_18) {
     "use strict";
-    var __moduleName = context_16 && context_16.id;
+    var __moduleName = context_18 && context_18.id;
     var resolveModule_9;
     /**
      * Declare angular factory with decorated factory method.
@@ -573,7 +626,7 @@ System.register("ionic-typescript/decorators/filter", ["ionic-typescript/resolve
             module.filter(name, target[key]);
         };
     }
-    exports_16("Filter", Filter);
+    exports_18("Filter", Filter);
     return {
         setters:[
             function (resolveModule_9_1) {
@@ -583,9 +636,9 @@ System.register("ionic-typescript/decorators/filter", ["ionic-typescript/resolve
         }
     }
 });
-System.register("ionic-typescript/decorators/inject", [], function(exports_17, context_17) {
+System.register("ionic-typescript/decorators/inject", [], function(exports_19, context_19) {
     "use strict";
-    var __moduleName = context_17 && context_17.id;
+    var __moduleName = context_19 && context_19.id;
     /**
      * Define parameter injection to constructor or function
      * @param {string} dependency - name of provider to include as
@@ -598,16 +651,16 @@ System.register("ionic-typescript/decorators/inject", [], function(exports_17, c
             target.$inject[index] = dependency;
         };
     }
-    exports_17("Inject", Inject);
+    exports_19("Inject", Inject);
     return {
         setters:[],
         execute: function() {
         }
     }
 });
-System.register("ionic-typescript/decorators/module", [], function(exports_18, context_18) {
+System.register("ionic-typescript/decorators/module", [], function(exports_20, context_20) {
     "use strict";
-    var __moduleName = context_18 && context_18.id;
+    var __moduleName = context_20 && context_20.id;
     /**
      * Declare angular module with given name.
      * Use @Requires to declare requirements.
@@ -622,16 +675,16 @@ System.register("ionic-typescript/decorators/module", [], function(exports_18, c
             new target(angular.module(name, target.$inject || []));
         };
     }
-    exports_18("Module", Module);
+    exports_20("Module", Module);
     return {
         setters:[],
         execute: function() {
         }
     }
 });
-System.register("ionic-typescript/decorators/page", ["ionic-typescript/resolveModule"], function(exports_19, context_19) {
+System.register("ionic-typescript/decorators/page", ["ionic-typescript/resolveModule"], function(exports_21, context_21) {
     "use strict";
-    var __moduleName = context_19 && context_19.id;
+    var __moduleName = context_21 && context_21.id;
     var resolveModule_10;
     /**
      * Declare UIRouter state with decorated class as controller.
@@ -656,7 +709,7 @@ System.register("ionic-typescript/decorators/page", ["ionic-typescript/resolveMo
                 }]);
         };
     }
-    exports_19("Page", Page);
+    exports_21("Page", Page);
     return {
         setters:[
             function (resolveModule_10_1) {
@@ -666,9 +719,9 @@ System.register("ionic-typescript/decorators/page", ["ionic-typescript/resolveMo
         }
     }
 });
-System.register("ionic-typescript/decorators/provider", ["ionic-typescript/resolveModule"], function(exports_20, context_20) {
+System.register("ionic-typescript/decorators/provider", ["ionic-typescript/resolveModule"], function(exports_22, context_22) {
     "use strict";
-    var __moduleName = context_20 && context_20.id;
+    var __moduleName = context_22 && context_22.id;
     var resolveModule_11;
     /**
      * Declare angular service provider with decorated class.
@@ -684,7 +737,7 @@ System.register("ionic-typescript/decorators/provider", ["ionic-typescript/resol
             module.provider(name, target);
         };
     }
-    exports_20("Provider", Provider);
+    exports_22("Provider", Provider);
     return {
         setters:[
             function (resolveModule_11_1) {
@@ -694,9 +747,9 @@ System.register("ionic-typescript/decorators/provider", ["ionic-typescript/resol
         }
     }
 });
-System.register("ionic-typescript/decorators/providerFactory", ["ionic-typescript/resolveModule"], function(exports_21, context_21) {
+System.register("ionic-typescript/decorators/providerFactory", ["ionic-typescript/resolveModule"], function(exports_23, context_23) {
     "use strict";
-    var __moduleName = context_21 && context_21.id;
+    var __moduleName = context_23 && context_23.id;
     var resolveModule_12;
     /**
      * Declare angular service provider with decorated factory method.
@@ -711,7 +764,7 @@ System.register("ionic-typescript/decorators/providerFactory", ["ionic-typescrip
             module.provider(name, target[key]);
         };
     }
-    exports_21("ProviderFactory", ProviderFactory);
+    exports_23("ProviderFactory", ProviderFactory);
     return {
         setters:[
             function (resolveModule_12_1) {
@@ -721,9 +774,9 @@ System.register("ionic-typescript/decorators/providerFactory", ["ionic-typescrip
         }
     }
 });
-System.register("ionic-typescript/decorators/requires", [], function(exports_22, context_22) {
+System.register("ionic-typescript/decorators/requires", [], function(exports_24, context_24) {
     "use strict";
-    var __moduleName = context_22 && context_22.id;
+    var __moduleName = context_24 && context_24.id;
     /**
      * Define module or service injection requirements.
      * @param {string} requires - 1 or more names of modules to require for module injection or providers to inject to constructor.
@@ -738,16 +791,16 @@ System.register("ionic-typescript/decorators/requires", [], function(exports_22,
             target.$inject = requires || [];
         };
     }
-    exports_22("Requires", Requires);
+    exports_24("Requires", Requires);
     return {
         setters:[],
         execute: function() {
         }
     }
 });
-System.register("ionic-typescript/decorators/run", ["ionic-typescript/resolveModule"], function(exports_23, context_23) {
+System.register("ionic-typescript/decorators/run", ["ionic-typescript/resolveModule"], function(exports_25, context_25) {
     "use strict";
-    var __moduleName = context_23 && context_23.id;
+    var __moduleName = context_25 && context_25.id;
     var resolveModule_13;
     /**
      * Declare angular run clause with decorated class. New instance of decorated class will be instantiated inside run clause.
@@ -766,7 +819,7 @@ System.register("ionic-typescript/decorators/run", ["ionic-typescript/resolveMod
             module.run(run);
         };
     }
-    exports_23("Run", Run);
+    exports_25("Run", Run);
     return {
         setters:[
             function (resolveModule_13_1) {
@@ -776,9 +829,9 @@ System.register("ionic-typescript/decorators/run", ["ionic-typescript/resolveMod
         }
     }
 });
-System.register("ionic-typescript/decorators/service", ["ionic-typescript/resolveModule"], function(exports_24, context_24) {
+System.register("ionic-typescript/decorators/service", ["ionic-typescript/resolveModule"], function(exports_26, context_26) {
     "use strict";
-    var __moduleName = context_24 && context_24.id;
+    var __moduleName = context_26 && context_26.id;
     var resolveModule_14;
     /**
      * Declare angular service as class
@@ -793,7 +846,7 @@ System.register("ionic-typescript/decorators/service", ["ionic-typescript/resolv
             module.service(name, target);
         };
     }
-    exports_24("Service", Service);
+    exports_26("Service", Service);
     return {
         setters:[
             function (resolveModule_14_1) {
@@ -803,9 +856,9 @@ System.register("ionic-typescript/decorators/service", ["ionic-typescript/resolv
         }
     }
 });
-System.register("ionic-typescript/decorators/serviceFactory", ["ionic-typescript/resolveModule"], function(exports_25, context_25) {
+System.register("ionic-typescript/decorators/serviceFactory", ["ionic-typescript/resolveModule"], function(exports_27, context_27) {
     "use strict";
-    var __moduleName = context_25 && context_25.id;
+    var __moduleName = context_27 && context_27.id;
     var resolveModule_15;
     /**
      * Declare angular service with decorated factory method.
@@ -820,7 +873,7 @@ System.register("ionic-typescript/decorators/serviceFactory", ["ionic-typescript
             module.service(name, target[key]);
         };
     }
-    exports_25("ServiceFactory", ServiceFactory);
+    exports_27("ServiceFactory", ServiceFactory);
     return {
         setters:[
             function (resolveModule_15_1) {
@@ -830,9 +883,9 @@ System.register("ionic-typescript/decorators/serviceFactory", ["ionic-typescript
         }
     }
 });
-System.register("ionic-typescript/decorators/sideMenu", ["ionic-typescript/resolveModule"], function(exports_26, context_26) {
+System.register("ionic-typescript/decorators/sideMenu", ["ionic-typescript/resolveModule"], function(exports_28, context_28) {
     "use strict";
-    var __moduleName = context_26 && context_26.id;
+    var __moduleName = context_28 && context_28.id;
     var resolveModule_16;
     function getTemplateWrapper(config) {
         config.navBarClass = config.navBarClass ? config.navBarClass : "bar-positive";
@@ -855,7 +908,7 @@ System.register("ionic-typescript/decorators/sideMenu", ["ionic-typescript/resol
                 }]);
         };
     }
-    exports_26("SideMenu", SideMenu);
+    exports_28("SideMenu", SideMenu);
     return {
         setters:[
             function (resolveModule_16_1) {
@@ -865,9 +918,9 @@ System.register("ionic-typescript/decorators/sideMenu", ["ionic-typescript/resol
         }
     }
 });
-System.register("ionic-typescript/decorators/sideMenuPage", ["ionic-typescript/resolveModule"], function(exports_27, context_27) {
+System.register("ionic-typescript/decorators/sideMenuPage", ["ionic-typescript/resolveModule"], function(exports_29, context_29) {
     "use strict";
-    var __moduleName = context_27 && context_27.id;
+    var __moduleName = context_29 && context_29.id;
     var resolveModule_17;
     /**
      * Declare UIRouter state with decorated class as controller.
@@ -884,7 +937,9 @@ System.register("ionic-typescript/decorators/sideMenuPage", ["ionic-typescript/r
             module = resolveModule_17.default(module);
             module.config(["$stateProvider", function ($stateProvider) {
                     var url = (" " + config.url).slice(1);
+                    var params = config.params;
                     delete config.url;
+                    delete config.params;
                     if (typeof sideMenu === "string") {
                         target.__stateName = sideMenu + "." + stateName;
                     }
@@ -893,6 +948,7 @@ System.register("ionic-typescript/decorators/sideMenuPage", ["ionic-typescript/r
                     }
                     var stateProperties = {
                         url: url,
+                        params: params,
                         views: {
                             menuContent: angular.extend({
                                 controller: target,
@@ -904,7 +960,7 @@ System.register("ionic-typescript/decorators/sideMenuPage", ["ionic-typescript/r
                 }]);
         };
     }
-    exports_27("SideMenuPage", SideMenuPage);
+    exports_29("SideMenuPage", SideMenuPage);
     return {
         setters:[
             function (resolveModule_17_1) {
@@ -914,9 +970,9 @@ System.register("ionic-typescript/decorators/sideMenuPage", ["ionic-typescript/r
         }
     }
 });
-System.register("ionic-typescript/decorators/value", ["ionic-typescript/resolveModule"], function(exports_28, context_28) {
+System.register("ionic-typescript/decorators/value", ["ionic-typescript/resolveModule"], function(exports_30, context_30) {
     "use strict";
-    var __moduleName = context_28 && context_28.id;
+    var __moduleName = context_30 && context_30.id;
     var resolveModule_18;
     /**
      * Declare angular value provider with decorated class.
@@ -931,7 +987,7 @@ System.register("ionic-typescript/decorators/value", ["ionic-typescript/resolveM
             module.value(name, new target());
         };
     }
-    exports_28("Value", Value);
+    exports_30("Value", Value);
     return {
         setters:[
             function (resolveModule_18_1) {
@@ -941,118 +997,118 @@ System.register("ionic-typescript/decorators/value", ["ionic-typescript/resolveM
         }
     }
 });
-System.register("ionic-typescript/decorators/index", ["ionic-typescript/decorators/app", "ionic-typescript/decorators/classFactory", "ionic-typescript/decorators/component", "ionic-typescript/decorators/config", "ionic-typescript/decorators/constant", "ionic-typescript/decorators/controller", "ionic-typescript/decorators/directive", "ionic-typescript/decorators/directiveFactory", "ionic-typescript/decorators/factory", "ionic-typescript/decorators/filter", "ionic-typescript/decorators/inject", "ionic-typescript/decorators/module", "ionic-typescript/decorators/page", "ionic-typescript/decorators/provider", "ionic-typescript/decorators/providerFactory", "ionic-typescript/decorators/requires", "ionic-typescript/decorators/run", "ionic-typescript/decorators/service", "ionic-typescript/decorators/serviceFactory", "ionic-typescript/decorators/sideMenu", "ionic-typescript/decorators/sideMenuPage", "ionic-typescript/decorators/value"], function(exports_29, context_29) {
+System.register("ionic-typescript/decorators/index", ["ionic-typescript/decorators/app", "ionic-typescript/decorators/classFactory", "ionic-typescript/decorators/component", "ionic-typescript/decorators/config", "ionic-typescript/decorators/constant", "ionic-typescript/decorators/controller", "ionic-typescript/decorators/directive", "ionic-typescript/decorators/directiveFactory", "ionic-typescript/decorators/factory", "ionic-typescript/decorators/filter", "ionic-typescript/decorators/inject", "ionic-typescript/decorators/module", "ionic-typescript/decorators/page", "ionic-typescript/decorators/provider", "ionic-typescript/decorators/providerFactory", "ionic-typescript/decorators/requires", "ionic-typescript/decorators/run", "ionic-typescript/decorators/service", "ionic-typescript/decorators/serviceFactory", "ionic-typescript/decorators/sideMenu", "ionic-typescript/decorators/sideMenuPage", "ionic-typescript/decorators/value"], function(exports_31, context_31) {
     "use strict";
-    var __moduleName = context_29 && context_29.id;
+    var __moduleName = context_31 && context_31.id;
     return {
         setters:[
             function (app_1_1) {
-                exports_29({
+                exports_31({
                     "App": app_1_1["App"]
                 });
             },
             function (classFactory_1_1) {
-                exports_29({
+                exports_31({
                     "ClassFactory": classFactory_1_1["ClassFactory"]
                 });
             },
             function (component_1_1) {
-                exports_29({
+                exports_31({
                     "Component": component_1_1["Component"]
                 });
             },
             function (config_1_1) {
-                exports_29({
+                exports_31({
                     "Config": config_1_1["Config"]
                 });
             },
             function (constant_1_1) {
-                exports_29({
+                exports_31({
                     "Constant": constant_1_1["Constant"]
                 });
             },
             function (controller_1_1) {
-                exports_29({
+                exports_31({
                     "Controller": controller_1_1["Controller"]
                 });
             },
             function (directive_1_1) {
-                exports_29({
+                exports_31({
                     "Directive": directive_1_1["Directive"]
                 });
             },
             function (directiveFactory_1_1) {
-                exports_29({
+                exports_31({
                     "DirectiveFactory": directiveFactory_1_1["DirectiveFactory"]
                 });
             },
             function (factory_1_1) {
-                exports_29({
+                exports_31({
                     "Factory": factory_1_1["Factory"]
                 });
             },
             function (filter_1_1) {
-                exports_29({
+                exports_31({
                     "Filter": filter_1_1["Filter"]
                 });
             },
             function (inject_1_1) {
-                exports_29({
+                exports_31({
                     "Inject": inject_1_1["Inject"]
                 });
             },
             function (module_1_1) {
-                exports_29({
+                exports_31({
                     "Module": module_1_1["Module"]
                 });
             },
             function (page_1_1) {
-                exports_29({
+                exports_31({
                     "Page": page_1_1["Page"]
                 });
             },
             function (provider_1_1) {
-                exports_29({
+                exports_31({
                     "Provider": provider_1_1["Provider"]
                 });
             },
             function (providerFactory_1_1) {
-                exports_29({
+                exports_31({
                     "ProviderFactory": providerFactory_1_1["ProviderFactory"]
                 });
             },
             function (requires_1_1) {
-                exports_29({
+                exports_31({
                     "Requires": requires_1_1["Requires"]
                 });
             },
             function (run_1_1) {
-                exports_29({
+                exports_31({
                     "Run": run_1_1["Run"]
                 });
             },
-            function (service_1_1) {
-                exports_29({
-                    "Service": service_1_1["Service"]
+            function (service_2_1) {
+                exports_31({
+                    "Service": service_2_1["Service"]
                 });
             },
             function (serviceFactory_1_1) {
-                exports_29({
+                exports_31({
                     "ServiceFactory": serviceFactory_1_1["ServiceFactory"]
                 });
             },
             function (sideMenu_1_1) {
-                exports_29({
+                exports_31({
                     "SideMenu": sideMenu_1_1["SideMenu"]
                 });
             },
             function (sideMenuPage_1_1) {
-                exports_29({
+                exports_31({
                     "SideMenuPage": sideMenuPage_1_1["SideMenuPage"]
                 });
             },
             function (value_1_1) {
-                exports_29({
+                exports_31({
                     "Value": value_1_1["Value"]
                 });
             }],
@@ -1061,9 +1117,9 @@ System.register("ionic-typescript/decorators/index", ["ionic-typescript/decorato
     }
 });
 /// <reference path="typings.d.ts" />
-System.register("ts/app", ["ionic-typescript/decorators/index", "ionic-typescript/pageBase", "ionic-typescript/sideMenuBase", "ionic-typescript/navController"], function(exports_30, context_30) {
+System.register("ts/app", ["ionic-typescript/decorators/index", "ionic-typescript/pageBase", "ionic-typescript/sideMenuBase", "ionic-typescript/navController", "angular-openiddict/service"], function(exports_32, context_32) {
     "use strict";
-    var __moduleName = context_30 && context_30.id;
+    var __moduleName = context_32 && context_32.id;
     var decorators_1;
     var IonicApplication, IonicApplicationRun;
     var exportedNames_1 = {
@@ -1071,14 +1127,15 @@ System.register("ts/app", ["ionic-typescript/decorators/index", "ionic-typescrip
         'PageBase': true,
         'SideMenuBase': true,
         'ISideMenuConfig': true,
-        'NavController': true
+        'NavController': true,
+        'OpenIddictHttpService': true
     };
     function exportStar_1(m) {
         var exports = {};
         for(var n in m) {
             if (n !== "default"&& !exportedNames_1.hasOwnProperty(n)) exports[n] = m[n];
         }
-        exports_30(exports);
+        exports_32(exports);
     }
     return {
         setters:[
@@ -1087,33 +1144,40 @@ System.register("ts/app", ["ionic-typescript/decorators/index", "ionic-typescrip
                 decorators_1 = decorators_2_1;
             },
             function (pageBase_1_1) {
-                exports_30({
+                exports_32({
                     "PageBase": pageBase_1_1["PageBase"]
                 });
             },
             function (sideMenuBase_1_1) {
-                exports_30({
+                exports_32({
                     "SideMenuBase": sideMenuBase_1_1["SideMenuBase"],
                     "ISideMenuConfig": sideMenuBase_1_1["ISideMenuConfig"]
                 });
             },
             function (navController_2_1) {
-                exports_30({
+                exports_32({
                     "NavController": navController_2_1["NavController"]
+                });
+            },
+            function (service_3_1) {
+                exports_32({
+                    "OpenIddictHttpService": service_3_1["OpenIddictHttpService"]
                 });
             }],
         execute: function() {
-            exports_30("IonicApplication", IonicApplication = angular.module("app", ["ionic", "openIddict", "ionic1-forward"]));
+            exports_32("IonicApplication", IonicApplication = angular.module("app", ["ionic", "openIddict", "ionic1-forward"]));
             IonicApplication.config(["$urlRouterProvider", function ($urlRouterProvider) {
                     $urlRouterProvider.otherwise("/login");
                 }]);
+            IonicApplication.value("baseUrl", "http://localhost:5000/");
             IonicApplicationRun = (function () {
-                function IonicApplicationRun(ionicPlatform, openIddictConfig) {
+                function IonicApplicationRun(ionicPlatform, openIddictConfig, _baseUrl) {
                     this.ionicPlatform = ionicPlatform;
                     this.openIddictConfig = openIddictConfig;
+                    this._baseUrl = _baseUrl;
                     openIddictConfig.scope = "email profile";
-                    openIddictConfig.registerUrl = "http://localhost:5000/api/account";
-                    openIddictConfig.tokenUrl = "http://localhost:5000/connect/token";
+                    openIddictConfig.registerUrl = _baseUrl + "api/account";
+                    openIddictConfig.tokenUrl = _baseUrl + "connect/token";
                     ionicPlatform.ready(function () {
                         if (window.cordova && window.cordova.plugins.Keyboard) {
                             window.cordova.plugins.hideKeyboardAccessoryBar(true);
@@ -1127,23 +1191,63 @@ System.register("ts/app", ["ionic-typescript/decorators/index", "ionic-typescrip
                 IonicApplicationRun = __decorate([
                     decorators_1.Run(IonicApplication),
                     __param(0, decorators_1.Inject("$ionicPlatform")),
-                    __param(1, decorators_1.Inject("openIddictConfig")), 
-                    __metadata('design:paramtypes', [Object, Object])
+                    __param(1, decorators_1.Inject("openIddictConfig")),
+                    __param(2, decorators_1.Inject("baseUrl")), 
+                    __metadata('design:paramtypes', [Object, Object, String])
                 ], IonicApplicationRun);
                 return IonicApplicationRun;
             }());
         }
     }
 });
-System.register("ts/pages/createCigar", ["ts/app"], function(exports_31, context_31) {
+System.register("ts/services/cigarService", ["ts/app"], function(exports_33, context_33) {
     "use strict";
-    var __moduleName = context_31 && context_31.id;
+    var __moduleName = context_33 && context_33.id;
     var app_2;
-    var CreateCigarPage;
+    var CigarService;
     return {
         setters:[
             function (app_2_1) {
                 app_2 = app_2_1;
+            }],
+        execute: function() {
+            CigarService = (function () {
+                function CigarService(_logService, _openIddictHttpService, _baseUrl) {
+                    this._logService = _logService;
+                    this._openIddictHttpService = _openIddictHttpService;
+                    this._baseUrl = _baseUrl;
+                }
+                CigarService.prototype.get = function (search) {
+                    var url = this._baseUrl + "/api/cigars?search=search";
+                    this._logService.info("");
+                    return this._openIddictHttpService.get(url);
+                };
+                CigarService.prototype.post = function (cigar) {
+                    var url = this._baseUrl + "/api/cigars";
+                    return this._openIddictHttpService.post(url, cigar);
+                };
+                CigarService = __decorate([
+                    app_2.Service(app_2.IonicApplication, "cigarService"),
+                    __param(0, app_2.Inject("$log")),
+                    __param(1, app_2.Inject("openIddictHttpService")),
+                    __param(2, app_2.Inject("baseUrl")), 
+                    __metadata('design:paramtypes', [Object, app_2.OpenIddictHttpService, String])
+                ], CigarService);
+                return CigarService;
+            }());
+            exports_33("CigarService", CigarService);
+        }
+    }
+});
+System.register("ts/pages/createCigar", ["ts/app"], function(exports_34, context_34) {
+    "use strict";
+    var __moduleName = context_34 && context_34.id;
+    var app_3;
+    var CreateCigarPage;
+    return {
+        setters:[
+            function (app_3_1) {
+                app_3 = app_3_1;
             }],
         execute: function() {
             CreateCigarPage = (function (_super) {
@@ -1155,33 +1259,33 @@ System.register("ts/pages/createCigar", ["ts/app"], function(exports_31, context
                     this._logService.log("Opened createCigar");
                 }
                 CreateCigarPage.prototype.save = function () {
-                    this._nav.pop({ something: 1 });
+                    this._nav.pop({ cigar: { name: "test" } }, { historyRoot: true });
                 };
                 CreateCigarPage = __decorate([
-                    app_2.SideMenuPage(app_2.IonicApplication, "mainMenu", "createCigar", {
+                    app_3.SideMenuPage(app_3.IonicApplication, "mainMenu", "createCigar", {
                         url: "/createCigar",
                         template: "\n        <ion-view view-title=\"Create Cigar\">\n            <ion-content class=\"padding\">\n                Create a Cigar\n                <button class=\"button button-energized\" ng-click=\"$ctrl.save()\">Save new cigar</button>\n            </ion-content>\n        </ion-view>\n    "
                     }),
-                    __param(0, app_2.Inject("$log")),
-                    __param(1, app_2.Inject("navController")),
-                    __param(2, app_2.Inject("$scope")), 
-                    __metadata('design:paramtypes', [Object, app_2.NavController, Object])
+                    __param(0, app_3.Inject("$log")),
+                    __param(1, app_3.Inject("navController")),
+                    __param(2, app_3.Inject("$scope")), 
+                    __metadata('design:paramtypes', [Object, app_3.NavController, Object])
                 ], CreateCigarPage);
                 return CreateCigarPage;
-            }(app_2.PageBase));
-            exports_31("CreateCigarPage", CreateCigarPage);
+            }(app_3.PageBase));
+            exports_34("CreateCigarPage", CreateCigarPage);
         }
     }
 });
-System.register("ts/pages/addRating", ["ts/app", "ts/pages/createCigar"], function(exports_32, context_32) {
+System.register("ts/pages/addRating", ["ts/app", "ts/pages/createCigar"], function(exports_35, context_35) {
     "use strict";
-    var __moduleName = context_32 && context_32.id;
-    var app_3, createCigar_1;
+    var __moduleName = context_35 && context_35.id;
+    var app_4, createCigar_1;
     var AddRatingPage;
     return {
         setters:[
-            function (app_3_1) {
-                app_3 = app_3_1;
+            function (app_4_1) {
+                app_4 = app_4_1;
             },
             function (createCigar_1_1) {
                 createCigar_1 = createCigar_1_1;
@@ -1189,40 +1293,50 @@ System.register("ts/pages/addRating", ["ts/app", "ts/pages/createCigar"], functi
         execute: function() {
             AddRatingPage = (function (_super) {
                 __extends(AddRatingPage, _super);
-                function AddRatingPage(_logService, _nav, scope) {
+                function AddRatingPage(_logService, _timeoutService, _nav, scope) {
                     _super.call(this, scope);
                     this._logService = _logService;
+                    this._timeoutService = _timeoutService;
                     this._nav = _nav;
                     this._logService.log("Opened addRating");
                 }
                 AddRatingPage.prototype.goToCreateCigar = function () {
                     this._nav.push(createCigar_1.CreateCigarPage);
                 };
+                AddRatingPage.prototype.ionViewDidEnter = function (event, data) {
+                    this.cigar = data.stateParams.cigar;
+                    delete data.stateParams.cigar;
+                    console.log(this.cigar, data.stateParams.cigar);
+                };
                 AddRatingPage = __decorate([
-                    app_3.SideMenuPage(app_3.IonicApplication, "mainMenu", "addRating", {
+                    app_4.SideMenuPage(app_4.IonicApplication, "mainMenu", "addRating", {
                         url: "/addRating",
-                        template: "\n        <ion-view view-title=\"Add Rating\">\n            <ion-content class=\"padding\">\n                <button class=\"button button-energized\" ng-click=\"$ctrl.goToCreateCigar()\">Create new cigar</button>\n            </ion-content>\n        </ion-view>\n    "
+                        template: "\n        <ion-view view-title=\"Add Rating\">\n            <ion-content class=\"padding\">\n                <button class=\"button button-energized\" ng-click=\"$ctrl.goToCreateCigar()\">Create new cigar</button>\n            </ion-content>\n        </ion-view>\n    ",
+                        params: {
+                            cigar: null
+                        }
                     }),
-                    __param(0, app_3.Inject("$log")),
-                    __param(1, app_3.Inject("navController")),
-                    __param(2, app_3.Inject("$scope")), 
-                    __metadata('design:paramtypes', [Object, app_3.NavController, Object])
+                    __param(0, app_4.Inject("$log")),
+                    __param(1, app_4.Inject("$timeout")),
+                    __param(2, app_4.Inject("navController")),
+                    __param(3, app_4.Inject("$scope")), 
+                    __metadata('design:paramtypes', [Object, Function, app_4.NavController, Object])
                 ], AddRatingPage);
                 return AddRatingPage;
-            }(app_3.PageBase));
-            exports_32("AddRatingPage", AddRatingPage);
+            }(app_4.PageBase));
+            exports_35("AddRatingPage", AddRatingPage);
         }
     }
 });
-System.register("ts/pages/forgotPassword", ["ts/app"], function(exports_33, context_33) {
+System.register("ts/pages/forgotPassword", ["ts/app"], function(exports_36, context_36) {
     "use strict";
-    var __moduleName = context_33 && context_33.id;
-    var app_4;
+    var __moduleName = context_36 && context_36.id;
+    var app_5;
     var ForgotPasswordController;
     return {
         setters:[
-            function (app_4_1) {
-                app_4 = app_4_1;
+            function (app_5_1) {
+                app_5 = app_5_1;
             }],
         execute: function() {
             ForgotPasswordController = (function (_super) {
@@ -1234,27 +1348,27 @@ System.register("ts/pages/forgotPassword", ["ts/app"], function(exports_33, cont
                     console.log(name);
                 };
                 ForgotPasswordController = __decorate([
-                    app_4.Page(app_4.IonicApplication, "forgotPassword", {
+                    app_5.Page(app_5.IonicApplication, "forgotPassword", {
                         template: "\n        <ion-view title=\"Register\">\n            <ion-nav-bar class=\"bar-balanced\">\n                <ion-nav-back-button>\n                </ion-nav-back-button>\n            </ion-nav-bar>\n            <ion-content padding=\"true\" scroll=\"false\">\n                <label class=\"item item-input\" style=\"margin-bottom: 40px;\">\n                    <span class=\"input-label\">Name</span>\n                    <input type=\"text\" ng-model=\"name\">\n                </label>\n                <button type=\"submit\" class=\"button button-calm button-block\" ng-click=\"$ctrl.forgotPassword(name)\">\n                    Login\n                </button>\n            </ion-content>\n        </ion-view>\n    "
                     }),
-                    __param(0, app_4.Inject("$scope")), 
+                    __param(0, app_5.Inject("$scope")), 
                     __metadata('design:paramtypes', [Object])
                 ], ForgotPasswordController);
                 return ForgotPasswordController;
-            }(app_4.PageBase));
-            exports_33("ForgotPasswordController", ForgotPasswordController);
+            }(app_5.PageBase));
+            exports_36("ForgotPasswordController", ForgotPasswordController);
         }
     }
 });
-System.register("ts/pages/home", ["ts/app"], function(exports_34, context_34) {
+System.register("ts/pages/home", ["ts/app"], function(exports_37, context_37) {
     "use strict";
-    var __moduleName = context_34 && context_34.id;
-    var app_5;
+    var __moduleName = context_37 && context_37.id;
+    var app_6;
     var HomePage;
     return {
         setters:[
-            function (app_5_1) {
-                app_5 = app_5_1;
+            function (app_6_1) {
+                app_6 = app_6_1;
             }],
         execute: function() {
             HomePage = (function (_super) {
@@ -1265,29 +1379,29 @@ System.register("ts/pages/home", ["ts/app"], function(exports_34, context_34) {
                     this._logService.log("Opened home");
                 }
                 HomePage = __decorate([
-                    app_5.SideMenuPage(app_5.IonicApplication, "mainMenu", "home", {
+                    app_6.SideMenuPage(app_6.IonicApplication, "mainMenu", "home", {
                         url: "/home",
                         template: "\n        <ion-view view-title=\"Page 1\">\n            <ion-content class=\"padding\">\n                <button class=\"button button-positive button-block\">I'm a home button!</button>\n            </ion-content>\n        </ion-view>\n    "
                     }),
-                    __param(0, app_5.Inject("$log")),
-                    __param(1, app_5.Inject("$scope")), 
+                    __param(0, app_6.Inject("$log")),
+                    __param(1, app_6.Inject("$scope")), 
                     __metadata('design:paramtypes', [Object, Object])
                 ], HomePage);
                 return HomePage;
-            }(app_5.PageBase));
-            exports_34("HomePage", HomePage);
+            }(app_6.PageBase));
+            exports_37("HomePage", HomePage);
         }
     }
 });
-System.register("ts/pages/login", ["ts/app", "ts/pages/home"], function(exports_35, context_35) {
+System.register("ts/pages/login", ["ts/app", "ts/pages/home"], function(exports_38, context_38) {
     "use strict";
-    var __moduleName = context_35 && context_35.id;
-    var app_6, home_1;
+    var __moduleName = context_38 && context_38.id;
+    var app_7, home_1;
     var LoginPage;
     return {
         setters:[
-            function (app_6_1) {
-                app_6 = app_6_1;
+            function (app_7_1) {
+                app_7 = app_7_1;
             },
             function (home_1_1) {
                 home_1 = home_1_1;
@@ -1301,7 +1415,6 @@ System.register("ts/pages/login", ["ts/app", "ts/pages/home"], function(exports_
                     this._stateService = _stateService;
                     this._openIddictHttpService = _openIddictHttpService;
                     this._nav = _nav;
-                    window.state = _stateService;
                 }
                 LoginPage.prototype.login = function (username, password) {
                     console.log(username, password);
@@ -1315,65 +1428,116 @@ System.register("ts/pages/login", ["ts/app", "ts/pages/home"], function(exports_
                     //     });
                 };
                 LoginPage = __decorate([
-                    app_6.Page(app_6.IonicApplication, "login", {
+                    app_7.Page(app_7.IonicApplication, "login", {
                         url: "/login",
                         template: "\n        <ion-view title=\"Login\">\n            <ion-nav-bar class=\"bar-balanced\">\n                <ion-nav-back-button>\n                </ion-nav-back-button>\n            </ion-nav-bar>\n            <ion-content padding=\"true\" scroll=\"false\" ng-init=\"username = ''; password = '';\">\n                <label class=\"item item-input\" style=\"margin-bottom: 40px;\">\n                    <span class=\"input-label\">Name</span>\n                    <input type=\"text\" ng-model=\"username\">\n                </label>\n                <label class=\"item item-input\" style=\"margin-bottom: 40px;\">\n                    <span class=\"input-label\">Password</span>\n                    <input type=\"password\" ng-model=\"password\">\n                </label>\n                <button type=\"submit\" class=\"button button-calm button-block\" ng-click=\"$ctrl.login(username, password)\">\n                    Login\n                </button>\n            </ion-content>\n        </ion-view>\n    "
                     }),
-                    __param(0, app_6.Inject("$log")),
-                    __param(1, app_6.Inject("$state")),
-                    __param(2, app_6.Inject("openIddictHttpService")),
-                    __param(3, app_6.Inject("navController")),
-                    __param(4, app_6.Inject("$scope")), 
-                    __metadata('design:paramtypes', [Object, Object, Object, app_6.NavController, Object])
+                    __param(0, app_7.Inject("$log")),
+                    __param(1, app_7.Inject("$state")),
+                    __param(2, app_7.Inject("openIddictHttpService")),
+                    __param(3, app_7.Inject("navController")),
+                    __param(4, app_7.Inject("$scope")), 
+                    __metadata('design:paramtypes', [Object, Object, Object, app_7.NavController, Object])
                 ], LoginPage);
                 return LoginPage;
-            }(app_6.PageBase));
-            exports_35("LoginPage", LoginPage);
-        }
-    }
-});
-System.register("ts/pages/myRatings", ["ts/app"], function(exports_36, context_36) {
-    "use strict";
-    var __moduleName = context_36 && context_36.id;
-    var app_7;
-    var MyRatingsPage;
-    return {
-        setters:[
-            function (app_7_1) {
-                app_7 = app_7_1;
-            }],
-        execute: function() {
-            MyRatingsPage = (function (_super) {
-                __extends(MyRatingsPage, _super);
-                function MyRatingsPage(_logService, scope) {
-                    _super.call(this, scope);
-                    this._logService = _logService;
-                    this._logService.log("Opened myRating");
-                }
-                MyRatingsPage = __decorate([
-                    app_7.SideMenuPage(app_7.IonicApplication, "mainMenu", "myRatings", {
-                        url: "/myRatings",
-                        template: "\n        <ion-view view-title=\"My Ratings\">\n            <ion-content class=\"padding\">\n                View my ratings\n            </ion-content>\n        </ion-view>\n    "
-                    }),
-                    __param(0, app_7.Inject("$log")),
-                    __param(1, app_7.Inject("$scope")), 
-                    __metadata('design:paramtypes', [Object, Object])
-                ], MyRatingsPage);
-                return MyRatingsPage;
             }(app_7.PageBase));
-            exports_36("MyRatingsPage", MyRatingsPage);
+            exports_38("LoginPage", LoginPage);
         }
     }
 });
-System.register("ts/pages/mainMenu", ["ts/app", "ts/pages/myRatings", "ts/pages/addRating"], function(exports_37, context_37) {
+System.register("ts/services/ratingService", ["ts/app"], function(exports_39, context_39) {
     "use strict";
-    var __moduleName = context_37 && context_37.id;
-    var app_8, myRatings_1, addRating_1;
-    var MainMenu;
+    var __moduleName = context_39 && context_39.id;
+    var app_8;
+    var RatingService;
     return {
         setters:[
             function (app_8_1) {
                 app_8 = app_8_1;
+            }],
+        execute: function() {
+            RatingService = (function () {
+                function RatingService(_logService, _openIddictHttpService, _baseUrl) {
+                    this._logService = _logService;
+                    this._openIddictHttpService = _openIddictHttpService;
+                    this._baseUrl = _baseUrl;
+                }
+                RatingService.prototype.get = function () {
+                    var url = this._baseUrl + "/api/me/ratings";
+                    return this._openIddictHttpService.get(url);
+                };
+                RatingService.prototype.post = function (rating) {
+                    var url = this._baseUrl + "/api/me/ratings";
+                    return this._openIddictHttpService.post(url, rating);
+                };
+                RatingService.prototype.put = function (rating) {
+                    var url = this._baseUrl + "/api/me/ratings/" + rating.id;
+                    return this._openIddictHttpService.put(url, rating);
+                };
+                RatingService.prototype.delete = function (id) {
+                    var url = this._baseUrl + "/api/me/ratings/" + id;
+                    return this._openIddictHttpService.delete(url);
+                };
+                RatingService = __decorate([
+                    app_8.Service(app_8.IonicApplication, "ratingService"),
+                    __param(0, app_8.Inject("$log")),
+                    __param(1, app_8.Inject("openIddictHttpService")),
+                    __param(2, app_8.Inject("baseUrl")), 
+                    __metadata('design:paramtypes', [Object, app_8.OpenIddictHttpService, String])
+                ], RatingService);
+                return RatingService;
+            }());
+            exports_39("RatingService", RatingService);
+        }
+    }
+});
+System.register("ts/pages/myRatings", ["ts/app", "ts/services/ratingService"], function(exports_40, context_40) {
+    "use strict";
+    var __moduleName = context_40 && context_40.id;
+    var app_9, ratingService_1;
+    var MyRatingsPage;
+    return {
+        setters:[
+            function (app_9_1) {
+                app_9 = app_9_1;
+            },
+            function (ratingService_1_1) {
+                ratingService_1 = ratingService_1_1;
+            }],
+        execute: function() {
+            MyRatingsPage = (function (_super) {
+                __extends(MyRatingsPage, _super);
+                function MyRatingsPage(_logService, _ratingService, scope) {
+                    _super.call(this, scope);
+                    this._logService = _logService;
+                    this._ratingService = _ratingService;
+                    this._logService.log("Opened myRating");
+                }
+                MyRatingsPage = __decorate([
+                    app_9.SideMenuPage(app_9.IonicApplication, "mainMenu", "myRatings", {
+                        url: "/myRatings",
+                        template: "\n        <ion-view view-title=\"My Ratings\">\n            <ion-content class=\"padding\">\n                View my ratings\n            </ion-content>\n        </ion-view>\n    "
+                    }),
+                    __param(0, app_9.Inject("$log")),
+                    __param(1, app_9.Inject("ratingService")),
+                    __param(2, app_9.Inject("$scope")), 
+                    __metadata('design:paramtypes', [Object, ratingService_1.RatingService, Object])
+                ], MyRatingsPage);
+                return MyRatingsPage;
+            }(app_9.PageBase));
+            exports_40("MyRatingsPage", MyRatingsPage);
+        }
+    }
+});
+System.register("ts/pages/mainMenu", ["ts/app", "ts/pages/myRatings", "ts/pages/addRating"], function(exports_41, context_41) {
+    "use strict";
+    var __moduleName = context_41 && context_41.id;
+    var app_10, myRatings_1, addRating_1;
+    var MainMenu;
+    return {
+        setters:[
+            function (app_10_1) {
+                app_10 = app_10_1;
             },
             function (myRatings_1_1) {
                 myRatings_1 = myRatings_1_1;
@@ -1397,28 +1561,28 @@ System.register("ts/pages/mainMenu", ["ts/app", "ts/pages/myRatings", "ts/pages/
                     this._nav.push(addRating_1.AddRatingPage, null, { historyRoot: true, disableAnimate: true });
                 };
                 MainMenu = __decorate([
-                    app_8.SideMenu(app_8.IonicApplication, "mainMenu", {
+                    app_10.SideMenu(app_10.IonicApplication, "mainMenu", {
                         template: "\n        <ion-list>\n            <ion-item menu-close ng-click=\"$ctrl.goToMyRatings()\">\n                My Ratings\n            </ion-item>\n            <ion-item menu-close ng-click=\"$ctrl.goToAddRatings()\">\n                Add Rating\n            </ion-item>\n        </ion-list>\n    "
                     }),
-                    __param(0, app_8.Inject("$log")),
-                    __param(1, app_8.Inject("navController")), 
-                    __metadata('design:paramtypes', [Object, app_8.NavController])
+                    __param(0, app_10.Inject("$log")),
+                    __param(1, app_10.Inject("navController")), 
+                    __metadata('design:paramtypes', [Object, app_10.NavController])
                 ], MainMenu);
                 return MainMenu;
-            }(app_8.SideMenuBase));
-            exports_37("MainMenu", MainMenu);
+            }(app_10.SideMenuBase));
+            exports_41("MainMenu", MainMenu);
         }
     }
 });
-System.register("ts/pages/register", ["ts/app"], function(exports_38, context_38) {
+System.register("ts/pages/register", ["ts/app"], function(exports_42, context_42) {
     "use strict";
-    var __moduleName = context_38 && context_38.id;
-    var app_9;
+    var __moduleName = context_42 && context_42.id;
+    var app_11;
     var RegisterPage;
     return {
         setters:[
-            function (app_9_1) {
-                app_9 = app_9_1;
+            function (app_11_1) {
+                app_11 = app_11_1;
             }],
         execute: function() {
             RegisterPage = (function (_super) {
@@ -1438,17 +1602,17 @@ System.register("ts/pages/register", ["ts/app"], function(exports_38, context_38
                     });
                 };
                 RegisterPage = __decorate([
-                    app_9.Page(app_9.IonicApplication, "register", {
+                    app_11.Page(app_11.IonicApplication, "register", {
                         template: "\n        <ion-view title=\"Register\">\n            <ion-nav-bar class=\"bar-balanced\">\n                <ion-nav-back-button>\n                </ion-nav-back-button>\n            </ion-nav-bar>\n            <ion-content padding=\"true\" scroll=\"false\">\n                <label class=\"item item-input\" style=\"margin-bottom: 40px;\">\n                    <span class=\"input-label\">Name</span>\n                    <input type=\"text\" ng-model=\"name\">\n                </label>\n                <label class=\"item item-input\" style=\"margin-bottom: 40px;\">\n                    <span class=\"input-label\">Password</span>\n                    <input type=\"password\" ng-model=\"password\">\n                </label>\n                <button type=\"submit\" class=\"button button-calm button-block\" ng-click=\"$ctrl.register(name, password)\">\n                    Register\n                </button>\n            </ion-content>\n        </ion-view>\n    ",
                     }),
-                    __param(0, app_9.Inject("$log")),
-                    __param(1, app_9.Inject("openIddictHttpService")),
-                    __param(2, app_9.Inject("$scope")), 
+                    __param(0, app_11.Inject("$log")),
+                    __param(1, app_11.Inject("openIddictHttpService")),
+                    __param(2, app_11.Inject("$scope")), 
                     __metadata('design:paramtypes', [Object, Object, Object])
                 ], RegisterPage);
                 return RegisterPage;
-            }(app_9.PageBase));
-            exports_38("RegisterPage", RegisterPage);
+            }(app_11.PageBase));
+            exports_42("RegisterPage", RegisterPage);
         }
     }
 });

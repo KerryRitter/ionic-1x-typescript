@@ -4,6 +4,7 @@ export * from "../ionic-typescript/decorators";
 export {PageBase} from "../ionic-typescript/pageBase";
 export {SideMenuBase, ISideMenuConfig} from "../ionic-typescript/sideMenuBase";
 export {NavController} from "../ionic-typescript/navController";
+export {OpenIddictHttpService} from "../angular-openiddict/service";
 
 import {App, Requires, Run, Inject} from "../ionic-typescript/decorators";
 
@@ -13,15 +14,18 @@ IonicApplication.config(["$urlRouterProvider", function ($urlRouterProvider) {
     $urlRouterProvider.otherwise("/login");
 }]);
 
+IonicApplication.value("baseUrl", "http://localhost:5000/");
+
 @Run(IonicApplication)
 class IonicApplicationRun {
     constructor(
         @Inject("$ionicPlatform") private ionicPlatform: ionic.platform.IonicPlatformService,
-        @Inject("openIddictConfig") private openIddictConfig: openIddict.IOpenIddictConfig
+        @Inject("openIddictConfig") private openIddictConfig: openIddict.IOpenIddictConfig,
+        @Inject("baseUrl") private _baseUrl: string
     ) {
         openIddictConfig.scope = "email profile";
-        openIddictConfig.registerUrl = "http://localhost:5000/api/account";
-        openIddictConfig.tokenUrl = "http://localhost:5000/connect/token";
+        openIddictConfig.registerUrl = `${_baseUrl}api/account`;
+        openIddictConfig.tokenUrl = `${_baseUrl}connect/token`;
 
         ionicPlatform.ready(function() {
             if (window.cordova && (window.cordova.plugins as any).Keyboard) {

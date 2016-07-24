@@ -34,7 +34,6 @@ export class LoginPage extends PageBase {
         @Inject("$scope") scope: ng.IScope
     ) {
         super(scope);
-        (window as any).state = _stateService;
     }
 
     public login(username: string, password: string) {
