@@ -1,6 +1,6 @@
 import { IonicApplication, SideMenu, Inject, SideMenuBase, ISideMenuConfig, NavController } from "../app";
 import { MyRatingsPage } from "./myRatings";
-import { AddRatingPage } from "./addRating";
+import { FindCigarPage } from "./findCigar";
 
 @SideMenu(IonicApplication, "mainMenu", {
     template: `
@@ -28,6 +28,6 @@ export class MainMenu extends SideMenuBase {
     }
 
     public goToAddRatings() {
-        this._nav.push(AddRatingPage, null, { historyRoot: true, disableAnimate: true });
+        this._nav.push(FindCigarPage, null, { historyRoot: true, disableAnimate: true });
     }
 }

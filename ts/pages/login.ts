@@ -37,14 +37,12 @@ export class LoginPage extends PageBase {
     }
 
     public login(username: string, password: string) {
-        console.log(username, password);
-        this._nav.push(HomePage);
-        // this._openIddictHttpService.login(username, password)
-        //     .then((response) => {
-        //         console.log(response);
-        //     })
-        //     .catch((response) => {
-        //         console.log(response);
-        //     });
+        this._openIddictHttpService.login(username, password)
+            .then((response) => {
+                this._nav.push(HomePage);
+            })
+            .catch((response: openIddict.IOpenIdToken) => {
+                alert(response.error_description);
+            });
     }
 }

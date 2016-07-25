@@ -49,7 +49,8 @@ export class OpenIddictHttpService implements openIddict.IOpenIddictHttpService 
                 data: { 
                     username: username, 
                     password: password, 
-                    grant_type: "password" 
+                    grant_type: "password",
+                    scope: "profile email"
                 }, 
                 transformRequest: this.transformToQueryString
             })
@@ -109,9 +110,8 @@ export class OpenIddictHttpService implements openIddict.IOpenIddictHttpService 
             config.headers = {};
         }
 
-        var token = this._windowService.localStorage.getItem("token") as openIddict.IOpenIdToken;
-        config.headers["Authorization"] = `Token ${token.access_token}`;
-        config.headers["Content-Type"] = "application/x-www-form-urlencoded";
+        var token = JSON.parse(this._windowService.localStorage.getItem("token")) as openIddict.IOpenIdToken;
+        config.headers["Authorization"] = `Bearer ${token.access_token}`;
         
         return config;
     }

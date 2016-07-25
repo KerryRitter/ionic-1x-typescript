@@ -76,7 +76,8 @@ gulp.task("concat:js", function() {
     return gulp.src([
         "node_modules/systemjs/dist/system.js",
         "node_modules/systemjs/dist/system-polyfills.js",
-        "node_modules/lodash/lodash.js"
+        "node_modules/lodash/lodash.js",
+        "node_modules/moment/moment.js"
     ])
     .pipe(concat("lib.js"))
     .pipe(gulp.dest("www/js"));
