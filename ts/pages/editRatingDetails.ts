@@ -3,17 +3,17 @@ import { RatingService } from "../services/RatingService";
 import { CreateCigarPage } from "./createCigar";
 import { MyRatingsPage } from "./myRatings";
 
-@SideMenuPage(IonicApplication, "mainMenu", "addRatingDetails", {
-    url: "/addRatingDetails",
+@SideMenuPage(IonicApplication, "mainMenu", "editRatingDetails", {
+    url: "/editRatingDetails",
     template: `
-        <ion-view view-title="Add Rating">
+        <ion-view view-title="Edit Rating">
             <ion-content class="padding">
                 <div class="card">
                     <div class="item item-divider">
                         Rating
                     </div>
                     <div class="item item-text-wrap">
-                        <five-star-rating ng-init="value = 3;" rating="value" style="font-size: 32px;"></five-star-rating>
+                        <five-star-rating rating="$ctrl.newRatingDetails.value" style="font-size: 32px;"></five-star-rating>
                     </div>
                 </div>
                 <div class="card">
@@ -21,28 +21,32 @@ import { MyRatingsPage } from "./myRatings";
                         Details
                     </div>
                     <div class="item item-text-wrap">
-                        <textarea rows="6" ng-model="details" style="width: 100%; resize: none;"></textarea>
+                        <textarea rows="6" ng-model="$ctrl.newRatingDetails.details" style="width: 100%; resize: none;"></textarea>
                     </div>
                 </div>
 
                 <div class="padding">
                     <button class="button button-block button-positive"
-                            ng-disabled="!value || !details"
+                            ng-disabled="!$ctrl.newRatingDetails.value || !$ctrl.newRatingDetails.details"
                             ng-click="$ctrl.save(value, details)">
                         Submit
+                    </button>
+
+                    <button class="button button-block button-stable"
+                            ng-click="$ctrl.goToViewRating()">
+                        Cancel
                     </button>
                 </div>
             </ion-content>
         </ion-view>
     `,
     params: {
-        cigar: null
+        rating: null
     }
 }) 
-export class AddRatingDetailsPage extends PageBase {
-    public cigar: ICigar;
-
-    public searchResults: ICigar[] = null;
+export class EditRatingDetailsPage extends PageBase {
+    public rating: IRating;
+    public newRatingDetails: IRating;
 
     public constructor(
         @Inject("$log") private _logService: ng.ILogService,
@@ -52,21 +56,14 @@ export class AddRatingDetailsPage extends PageBase {
         @Inject("$scope") scope: ng.IScope
     ) {
         super(scope);
-        this._logService.log("Opened AddRatingDetailsPage");
+        this._logService.log("Opened EditRatingDetailsPage");
     }
 
-    public save(value: number, details: string) {
-        const rating = { 
-            value: value,
-            details: details,
-            cigar: this.cigar
-        } as IRating;
-
+    public save() {
         this._ionicLoadingService.show({ template: "Loading..." });
-        this._ratingService.post(rating)
+        this._ratingService.put(this.newRatingDetails)
             .then((response) => {
                 this._ionicLoadingService.hide();
-                
                 this._nav.push(MyRatingsPage, null, { historyRoot: true });
             })
             .catch((response) => {
@@ -74,13 +71,12 @@ export class AddRatingDetailsPage extends PageBase {
             });
     }
 
-    public goToFindCigar() {
-        this._nav.pop({
-            cigar: this.cigar
-        });
+    public goToViewRating() {
+        this._nav.pop({ rating: this.rating });
     }
 
     public ionViewWillEnter(event: ng.IAngularEvent, data: any) {
-        this.cigar = data.stateParams.cigar;
+        this.rating = data.stateParams.rating;
+        this.newRatingDetails = angular.copy(this.rating);
     }
 }

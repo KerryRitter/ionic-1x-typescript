@@ -29,37 +29,46 @@ System.register("angular-openiddict/service", [], function(exports_1, context_1)
                     this._qService = _qService;
                     this._config = _config;
                 }
-                OpenIddictHttpService.prototype.register = function (username, password) {
+                OpenIddictHttpService.prototype.register = function (email, password) {
                     var _this = this;
                     return this._qService(function (resolve, reject) {
                         return _this._httpService({
                             method: "POST",
                             url: _this._config.registerUrl,
                             data: {
-                                username: username,
+                                email: email,
                                 password: password,
                             }
                         })
                             .success(function (data, status, headers, config) {
-                            if (data.error) {
-                                resolve({
-                                    success: false,
-                                    messages: [data.error_description]
-                                });
-                            }
-                            else {
-                                _this._windowService.localStorage.setItem("token", JSON.stringify(data));
+                            if (data.succeeded) {
                                 resolve({
                                     success: true,
                                     messages: null
                                 });
                             }
+                            else {
+                                var message = "There was an error during registration";
+                                try {
+                                    message = data.errors[0].description;
+                                }
+                                catch (ex) {
+                                    console.log(ex);
+                                }
+                                reject({
+                                    success: false,
+                                    messages: [message]
+                                });
+                            }
                         }).error(function (data, status, headers, config) {
-                            reject(data);
+                            reject({
+                                success: false,
+                                messages: ["There was a server error during registration"]
+                            });
                         });
                     });
                 };
-                OpenIddictHttpService.prototype.login = function (username, password) {
+                OpenIddictHttpService.prototype.login = function (email, password) {
                     var _this = this;
                     return this._qService(function (resolve, reject) {
                         return _this._httpService({
@@ -69,7 +78,7 @@ System.register("angular-openiddict/service", [], function(exports_1, context_1)
                                 "Content-Type": "application/x-www-form-urlencoded"
                             },
                             data: {
-                                username: username,
+                                username: email,
                                 password: password,
                                 grant_type: "password",
                                 scope: "profile email"
@@ -116,6 +125,26 @@ System.register("angular-openiddict/service", [], function(exports_1, context_1)
                 OpenIddictHttpService.prototype.patch = function (url, data, config) {
                     return this._httpService.patch(url, data, this.addTokenHeader(config));
                 };
+                Object.defineProperty(OpenIddictHttpService.prototype, "token", {
+                    get: function () {
+                        var tokenPayloadJson = this._windowService.localStorage.getItem("token");
+                        if (!tokenPayloadJson) {
+                            return null;
+                        }
+                        try {
+                            var token = JSON.parse(tokenPayloadJson);
+                            return token && token.access_token ? token.access_token : null;
+                        }
+                        catch (ex) {
+                            return null;
+                        }
+                    },
+                    enumerable: true,
+                    configurable: true
+                });
+                OpenIddictHttpService.prototype.clearToken = function () {
+                    this._windowService.localStorage.removeItem("token");
+                };
                 OpenIddictHttpService.prototype.addTokenHeader = function (config) {
                     if (!config) {
                         config = {};
@@ -123,8 +152,7 @@ System.register("angular-openiddict/service", [], function(exports_1, context_1)
                     if (!config.headers) {
                         config.headers = {};
                     }
-                    var token = JSON.parse(this._windowService.localStorage.getItem("token"));
-                    config.headers["Authorization"] = "Bearer " + token.access_token;
+                    config.headers["Authorization"] = "Bearer " + this.token;
                     return config;
                 };
                 OpenIddictHttpService.prototype.transformToQueryString = function (obj) {
@@ -892,7 +920,7 @@ System.register("ionic-typescript/decorators/sideMenu", ["ionic-typescript/resol
         config.menuTriggerButtonClass = config.menuTriggerButtonClass ? config.menuTriggerButtonClass : "button-clear";
         config.menuHeaderBarClass = config.menuHeaderBarClass ? config.menuHeaderBarClass : "bar-stable";
         config.menuHeaderBarTitle = config.menuHeaderBarTitle ? config.menuHeaderBarTitle : "Menu";
-        return "<ion-side-menus>\n                <ion-side-menu-content>\n                    <ion-nav-bar class=\"" + config.navBarClass + "\">\n                        <ion-nav-back-button>\n                        </ion-nav-back-button>\n                        <ion-nav-buttons side=\"left\">\n                            <button class=\"button button-icon ion-navicon " + config.menuTriggerButtonClass + "\" menu-toggle=\"left\"></button>\n                        </ion-nav-buttons>\n                    </ion-nav-bar>\n                    <ion-nav-view name=\"menuContent\"></ion-nav-view>\n                </ion-side-menu-content>\n                <ion-side-menu side=\"left\" enable-menu-with-back-views=\"true\">\n                    <ion-header-bar class=\"" + config.menuHeaderBarClass + "\">\n                        <h1 class=\"title\">" + config.menuHeaderBarTitle + "</h1>\n                    </ion-header-bar>\n                    <ion-content>\n                        " + config.template + "\n                    </ion-content>\n                </ion-side-menu>\n            </ion-side-menus>";
+        return "<ion-side-menus>\n                <ion-side-menu-content>\n                    <ion-nav-bar class=\"" + config.navBarClass + "\">\n                        <ion-nav-back-button>\n                        </ion-nav-back-button>\n                        <ion-nav-buttons side=\"left\">\n                            <button class=\"button button-icon ion-navicon " + config.menuTriggerButtonClass + "\" menu-toggle=\"left\"></button>\n                        </ion-nav-buttons>\n                    </ion-nav-bar>\n                    <ion-nav-view name=\"menuContent\"></ion-nav-view>\n                </ion-side-menu-content>\n                <ion-side-menu side=\"left\" enable-menu-with-back-views=\"true\">\n                    <ion-header-bar class=\"" + config.menuHeaderBarClass + "\">\n                        <h1 class=\"title\">" + config.menuHeaderBarTitle + "</h1>\n                    </ion-header-bar>\n                    <ion-content scroll=\"false\">\n                        " + config.template + "\n                    </ion-content>\n                </ion-side-menu>\n            </ion-side-menus>";
     }
     function SideMenu(module, stateName, config) {
         return function (target) {
@@ -1242,15 +1270,59 @@ System.register("ts/components/fiveStarRating", ["ts/app"], function(exports_33,
         }
     }
 });
-System.register("ts/services/ratingService", ["ts/app"], function(exports_34, context_34) {
+System.register("ts/components/lastModifiedDate", ["ts/app"], function(exports_34, context_34) {
     "use strict";
     var __moduleName = context_34 && context_34.id;
     var app_3;
-    var RatingService;
+    var LastModifiedDate;
     return {
         setters:[
             function (app_3_1) {
                 app_3 = app_3_1;
+            }],
+        execute: function() {
+            LastModifiedDate = (function () {
+                function LastModifiedDate() {
+                }
+                Object.defineProperty(LastModifiedDate.prototype, "lastModifiedDisplay", {
+                    get: function () {
+                        var lastModifiedMoment = window.moment(this.date);
+                        var wasWithinAWeek = lastModifiedMoment <= window.moment().subtract(7, "days");
+                        if (this.fullDateOnly || wasWithinAWeek) {
+                            return (this.fullDatePrefix ? this.fullDatePrefix : "") + " " + lastModifiedMoment.format("MMMM Do YYYY, h:mm a");
+                        }
+                        return lastModifiedMoment.fromNow();
+                    },
+                    enumerable: true,
+                    configurable: true
+                });
+                LastModifiedDate = __decorate([
+                    app_3.Component(app_3.IonicApplication, "lastModifiedDate", {
+                        template: "\n        <span>{{$ctrl.prefix ? $ctrl.prefix : ''}} {{$ctrl.lastModifiedDisplay}}</span>\n    ",
+                        bindings: {
+                            date: "=",
+                            prefix: "=",
+                            fullDatePrefix: "=",
+                            fullDateOnly: "="
+                        }
+                    }), 
+                    __metadata('design:paramtypes', [])
+                ], LastModifiedDate);
+                return LastModifiedDate;
+            }());
+            exports_34("LastModifiedDate", LastModifiedDate);
+        }
+    }
+});
+System.register("ts/services/ratingService", ["ts/app"], function(exports_35, context_35) {
+    "use strict";
+    var __moduleName = context_35 && context_35.id;
+    var app_4;
+    var RatingService;
+    return {
+        setters:[
+            function (app_4_1) {
+                app_4 = app_4_1;
             }],
         execute: function() {
             RatingService = (function () {
@@ -1280,27 +1352,27 @@ System.register("ts/services/ratingService", ["ts/app"], function(exports_34, co
                     return this._openIddictHttpService.delete(url);
                 };
                 RatingService = __decorate([
-                    app_3.Service(app_3.IonicApplication, "ratingService"),
-                    __param(0, app_3.Inject("$log")),
-                    __param(1, app_3.Inject("openIddictHttpService")),
-                    __param(2, app_3.Inject("baseUrl")), 
-                    __metadata('design:paramtypes', [Object, app_3.OpenIddictHttpService, String])
+                    app_4.Service(app_4.IonicApplication, "ratingService"),
+                    __param(0, app_4.Inject("$log")),
+                    __param(1, app_4.Inject("openIddictHttpService")),
+                    __param(2, app_4.Inject("baseUrl")), 
+                    __metadata('design:paramtypes', [Object, app_4.OpenIddictHttpService, String])
                 ], RatingService);
                 return RatingService;
             }());
-            exports_34("RatingService", RatingService);
+            exports_35("RatingService", RatingService);
         }
     }
 });
-System.register("ts/services/cigarService", ["ts/app"], function(exports_35, context_35) {
+System.register("ts/services/cigarService", ["ts/app"], function(exports_36, context_36) {
     "use strict";
-    var __moduleName = context_35 && context_35.id;
-    var app_4;
+    var __moduleName = context_36 && context_36.id;
+    var app_5;
     var CigarService;
     return {
         setters:[
-            function (app_4_1) {
-                app_4 = app_4_1;
+            function (app_5_1) {
+                app_5 = app_5_1;
             }],
         execute: function() {
             CigarService = (function () {
@@ -1320,27 +1392,27 @@ System.register("ts/services/cigarService", ["ts/app"], function(exports_35, con
                     return this._openIddictHttpService.post(url, cigar);
                 };
                 CigarService = __decorate([
-                    app_4.Service(app_4.IonicApplication, "cigarService"),
-                    __param(0, app_4.Inject("$log")),
-                    __param(1, app_4.Inject("openIddictHttpService")),
-                    __param(2, app_4.Inject("baseUrl")), 
-                    __metadata('design:paramtypes', [Object, app_4.OpenIddictHttpService, String])
+                    app_5.Service(app_5.IonicApplication, "cigarService"),
+                    __param(0, app_5.Inject("$log")),
+                    __param(1, app_5.Inject("openIddictHttpService")),
+                    __param(2, app_5.Inject("baseUrl")), 
+                    __metadata('design:paramtypes', [Object, app_5.OpenIddictHttpService, String])
                 ], CigarService);
                 return CigarService;
             }());
-            exports_35("CigarService", CigarService);
+            exports_36("CigarService", CigarService);
         }
     }
 });
-System.register("ts/pages/createCigar", ["ts/app", "ts/services/cigarService", "ts/pages/addRatingDetails"], function(exports_36, context_36) {
+System.register("ts/pages/createCigar", ["ts/app", "ts/services/cigarService", "ts/pages/addRatingDetails"], function(exports_37, context_37) {
     "use strict";
-    var __moduleName = context_36 && context_36.id;
-    var app_5, cigarService_1, addRatingDetails_1;
+    var __moduleName = context_37 && context_37.id;
+    var app_6, cigarService_1, addRatingDetails_1;
     var CreateCigarPage;
     return {
         setters:[
-            function (app_5_1) {
-                app_5 = app_5_1;
+            function (app_6_1) {
+                app_6 = app_6_1;
             },
             function (cigarService_1_1) {
                 cigarService_1 = cigarService_1_1;
@@ -1351,9 +1423,10 @@ System.register("ts/pages/createCigar", ["ts/app", "ts/services/cigarService", "
         execute: function() {
             CreateCigarPage = (function (_super) {
                 __extends(CreateCigarPage, _super);
-                function CreateCigarPage(_logService, _nav, _cigarService, scope) {
+                function CreateCigarPage(_logService, _ionicLoadingService, _nav, _cigarService, scope) {
                     _super.call(this, scope);
                     this._logService = _logService;
+                    this._ionicLoadingService = _ionicLoadingService;
                     this._nav = _nav;
                     this._cigarService = _cigarService;
                     this._logService.log("Opened createCigar");
@@ -1364,165 +1437,45 @@ System.register("ts/pages/createCigar", ["ts/app", "ts/services/cigarService", "
                         brand: brand,
                         name: name
                     };
+                    this._ionicLoadingService.show({ template: "Loading..." });
                     this._cigarService.post(cigar)
                         .then(function (response) {
+                        _this._ionicLoadingService.hide();
                         _this._nav.push(addRatingDetails_1.AddRatingDetailsPage, {
                             cigar: response.data
                         });
+                    })
+                        .catch(function (response) {
+                        _this._ionicLoadingService.hide();
                     });
                 };
                 CreateCigarPage = __decorate([
-                    app_5.SideMenuPage(app_5.IonicApplication, "mainMenu", "createCigar", {
+                    app_6.SideMenuPage(app_6.IonicApplication, "mainMenu", "createCigar", {
                         url: "/createCigar",
                         template: "\n        <ion-view view-title=\"Create Cigar\">\n            <ion-content class=\"padding\">\n                <div class=\"list\">\n                    <label class=\"item item-input item-floating-label\">\n                        <span class=\"input-label\">Cigar Brand (e.g. CAO, Drew Estate)</span>\n                        <input type=\"text\" \n                            placeholder=\"Cigar Brand (e.g. CAO, Drew Estate)\"\n                            ng-model=\"brand\">\n                    </label>\n                    <label class=\"item item-input item-floating-label\">\n                        <span class=\"input-label\">Cigar Name (e.g. Brazilia, Natural)</span>\n                        <input type=\"text\" \n                            placeholder=\"Cigar Name (e.g. Brazilia, Natural)\"\n                            ng-model=\"name\">\n                    </label>\n\n                    <button class=\"button button-block button-positive\"\n                        ng-disabled=\"!brand || !name\"\n                        ng-click=\"$ctrl.save(brand, name)\">\n                        Save\n                    </button>\n                </div>\n            </ion-content>\n        </ion-view>\n    "
                     }),
-                    __param(0, app_5.Inject("$log")),
-                    __param(1, app_5.Inject("navController")),
-                    __param(2, app_5.Inject("cigarService")),
-                    __param(3, app_5.Inject("$scope")), 
-                    __metadata('design:paramtypes', [Object, app_5.NavController, cigarService_1.CigarService, Object])
+                    __param(0, app_6.Inject("$log")),
+                    __param(1, app_6.Inject("$ionicLoading")),
+                    __param(2, app_6.Inject("navController")),
+                    __param(3, app_6.Inject("cigarService")),
+                    __param(4, app_6.Inject("$scope")), 
+                    __metadata('design:paramtypes', [Object, Object, app_6.NavController, cigarService_1.CigarService, Object])
                 ], CreateCigarPage);
                 return CreateCigarPage;
-            }(app_5.PageBase));
-            exports_36("CreateCigarPage", CreateCigarPage);
-        }
-    }
-});
-System.register("ts/pages/viewRating", ["ts/app", "ts/services/ratingService"], function(exports_37, context_37) {
-    "use strict";
-    var __moduleName = context_37 && context_37.id;
-    var app_6, ratingService_1;
-    var ViewRatingPage;
-    return {
-        setters:[
-            function (app_6_1) {
-                app_6 = app_6_1;
-            },
-            function (ratingService_1_1) {
-                ratingService_1 = ratingService_1_1;
-            }],
-        execute: function() {
-            ViewRatingPage = (function (_super) {
-                __extends(ViewRatingPage, _super);
-                function ViewRatingPage(_logService, _nav, _ratingService, scope) {
-                    _super.call(this, scope);
-                    this._logService = _logService;
-                    this._nav = _nav;
-                    this._ratingService = _ratingService;
-                    this.searchResults = null;
-                    this._logService.log("Opened ViewRatingDetailsPage");
-                }
-                Object.defineProperty(ViewRatingPage.prototype, "lastModifiedDisplay", {
-                    get: function () {
-                        if (!this.rating) {
-                            return "";
-                        }
-                        var lastModifiedMoment = window.moment(this.rating.lastModifiedAt);
-                        if (lastModifiedMoment > window.moment().subtract(7, "days")) {
-                            return lastModifiedMoment.fromNow();
-                        }
-                        return "at " + lastModifiedMoment.format("MMMM Do YYYY, h:mm a");
-                    },
-                    enumerable: true,
-                    configurable: true
-                });
-                ViewRatingPage.prototype.delete = function () {
-                    var _this = this;
-                    if (confirm("Are you sure?")) {
-                        this._ratingService.delete(this.rating)
-                            .then(function (response) {
-                            _this._nav.pop();
-                        });
-                    }
-                };
-                ViewRatingPage.prototype.ionViewWillEnter = function (event, data) {
-                    this.rating = data.stateParams.rating;
-                    data.stateParams.rating = null;
-                    this._logService.debug(this.rating, data.stateParams.rating);
-                };
-                ViewRatingPage = __decorate([
-                    app_6.SideMenuPage(app_6.IonicApplication, "mainMenu", "viewRating", {
-                        url: "/viewRating",
-                        template: "\n        <ion-view view-title=\"View Rating\">\n            <ion-content class=\"padding\">\n                <div class=\"card\">\n                    <div class=\"item item-divider\">\n                        Rating\n                    </div>\n                    <div class=\"item item-text-wrap\">\n                        <five-star-rating readonly=\"true\" rating=\"$ctrl.rating.value\" style=\"font-size: 32px;\"></five-star-rating>\n                    </div>\n                </div>\n\n                <div class=\"card\">\n                    <div class=\"item item-divider\">\n                        Details\n                    </div>\n                    <div class=\"item item-text-wrap\">\n                        {{$ctrl.rating.details}}\n                    </div>\n                </div>\n\n                <div>\n                    Last updated {{$ctrl.lastModifiedDisplay}}\n                </div>\n\n                <button class=\"button button-assertive button-positive\"\n                    ng-click=\"$ctrl.delete()\">\n                    Delete Rating\n                </button>\n            </ion-content>\n        </ion-view>\n    ",
-                        params: {
-                            rating: null
-                        }
-                    }),
-                    __param(0, app_6.Inject("$log")),
-                    __param(1, app_6.Inject("navController")),
-                    __param(2, app_6.Inject("ratingService")),
-                    __param(3, app_6.Inject("$scope")), 
-                    __metadata('design:paramtypes', [Object, app_6.NavController, ratingService_1.RatingService, Object])
-                ], ViewRatingPage);
-                return ViewRatingPage;
             }(app_6.PageBase));
-            exports_37("ViewRatingPage", ViewRatingPage);
+            exports_37("CreateCigarPage", CreateCigarPage);
         }
     }
 });
-System.register("ts/pages/myRatings", ["ts/app", "ts/services/ratingService", "ts/pages/viewRating"], function(exports_38, context_38) {
+System.register("ts/pages/editRatingDetails", ["ts/app", "ts/services/ratingService", "ts/pages/myRatings"], function(exports_38, context_38) {
     "use strict";
     var __moduleName = context_38 && context_38.id;
-    var app_7, ratingService_2, viewRating_1;
-    var MyRatingsPage;
+    var app_7, RatingService_1, myRatings_1;
+    var EditRatingDetailsPage;
     return {
         setters:[
             function (app_7_1) {
                 app_7 = app_7_1;
-            },
-            function (ratingService_2_1) {
-                ratingService_2 = ratingService_2_1;
-            },
-            function (viewRating_1_1) {
-                viewRating_1 = viewRating_1_1;
-            }],
-        execute: function() {
-            MyRatingsPage = (function (_super) {
-                __extends(MyRatingsPage, _super);
-                function MyRatingsPage(_logService, _nav, _ratingService, scope) {
-                    _super.call(this, scope);
-                    this._logService = _logService;
-                    this._nav = _nav;
-                    this._ratingService = _ratingService;
-                    this.ratings = [];
-                    this._logService.log("Opened myRating");
-                }
-                MyRatingsPage.prototype.goToViewRating = function (rating) {
-                    this._nav.push(viewRating_1.ViewRatingPage, { rating: rating });
-                };
-                MyRatingsPage.prototype.ionViewDidEnter = function () {
-                    var _this = this;
-                    this._ratingService.get()
-                        .then(function (response) {
-                        _this.ratings = response.data;
-                    });
-                };
-                MyRatingsPage = __decorate([
-                    app_7.SideMenuPage(app_7.IonicApplication, "mainMenu", "myRatings", {
-                        url: "/myRatings",
-                        template: "\n        <ion-view view-title=\"My Ratings\">\n            <ion-content class=\"padding\">\n                <ion-list>\n                    <ion-item collection-repeat=\"rating in $ctrl.ratings\" ng-click=\"$ctrl.goToViewRating(rating)\">\n                        {{rating.cigar.brand}} - {{rating.cigar.name}}\n                        <five-star-rating rating=\"rating.value\" readonly=\"true\" style=\"float: right;\"></five-star-rating>\n                    </ion-item>\n                </ion-list>\n            </ion-content>\n        </ion-view>\n    "
-                    }),
-                    __param(0, app_7.Inject("$log")),
-                    __param(1, app_7.Inject("navController")),
-                    __param(2, app_7.Inject("ratingService")),
-                    __param(3, app_7.Inject("$scope")), 
-                    __metadata('design:paramtypes', [Object, app_7.NavController, ratingService_2.RatingService, Object])
-                ], MyRatingsPage);
-                return MyRatingsPage;
-            }(app_7.PageBase));
-            exports_38("MyRatingsPage", MyRatingsPage);
-        }
-    }
-});
-System.register("ts/pages/addRatingDetails", ["ts/app", "ts/services/ratingService", "ts/pages/myRatings"], function(exports_39, context_39) {
-    "use strict";
-    var __moduleName = context_39 && context_39.id;
-    var app_8, RatingService_1, myRatings_1;
-    var AddRatingDetailsPage;
-    return {
-        setters:[
-            function (app_8_1) {
-                app_8 = app_8_1;
             },
             function (RatingService_1_1) {
                 RatingService_1 = RatingService_1_1;
@@ -1531,57 +1484,134 @@ System.register("ts/pages/addRatingDetails", ["ts/app", "ts/services/ratingServi
                 myRatings_1 = myRatings_1_1;
             }],
         execute: function() {
-            AddRatingDetailsPage = (function (_super) {
-                __extends(AddRatingDetailsPage, _super);
-                function AddRatingDetailsPage(_logService, _timeoutService, _nav, _ratingService, scope) {
+            EditRatingDetailsPage = (function (_super) {
+                __extends(EditRatingDetailsPage, _super);
+                function EditRatingDetailsPage(_logService, _ionicLoadingService, _nav, _ratingService, scope) {
                     _super.call(this, scope);
                     this._logService = _logService;
-                    this._timeoutService = _timeoutService;
+                    this._ionicLoadingService = _ionicLoadingService;
+                    this._nav = _nav;
+                    this._ratingService = _ratingService;
+                    this._logService.log("Opened EditRatingDetailsPage");
+                }
+                EditRatingDetailsPage.prototype.save = function () {
+                    var _this = this;
+                    this._ionicLoadingService.show({ template: "Loading..." });
+                    this._ratingService.put(this.newRatingDetails)
+                        .then(function (response) {
+                        _this._ionicLoadingService.hide();
+                        _this._nav.push(myRatings_1.MyRatingsPage, null, { historyRoot: true });
+                    })
+                        .catch(function (response) {
+                        _this._ionicLoadingService.hide();
+                    });
+                };
+                EditRatingDetailsPage.prototype.goToViewRating = function () {
+                    this._nav.pop({ rating: this.rating });
+                };
+                EditRatingDetailsPage.prototype.ionViewWillEnter = function (event, data) {
+                    this.rating = data.stateParams.rating;
+                    this.newRatingDetails = angular.copy(this.rating);
+                };
+                EditRatingDetailsPage = __decorate([
+                    app_7.SideMenuPage(app_7.IonicApplication, "mainMenu", "editRatingDetails", {
+                        url: "/editRatingDetails",
+                        template: "\n        <ion-view view-title=\"Edit Rating\">\n            <ion-content class=\"padding\">\n                <div class=\"card\">\n                    <div class=\"item item-divider\">\n                        Rating\n                    </div>\n                    <div class=\"item item-text-wrap\">\n                        <five-star-rating rating=\"$ctrl.newRatingDetails.value\" style=\"font-size: 32px;\"></five-star-rating>\n                    </div>\n                </div>\n                <div class=\"card\">\n                    <div class=\"item item-divider\">\n                        Details\n                    </div>\n                    <div class=\"item item-text-wrap\">\n                        <textarea rows=\"6\" ng-model=\"$ctrl.newRatingDetails.details\" style=\"width: 100%; resize: none;\"></textarea>\n                    </div>\n                </div>\n\n                <div class=\"padding\">\n                    <button class=\"button button-block button-positive\"\n                            ng-disabled=\"!$ctrl.newRatingDetails.value || !$ctrl.newRatingDetails.details\"\n                            ng-click=\"$ctrl.save(value, details)\">\n                        Submit\n                    </button>\n\n                    <button class=\"button button-block button-stable\"\n                            ng-click=\"$ctrl.goToViewRating()\">\n                        Cancel\n                    </button>\n                </div>\n            </ion-content>\n        </ion-view>\n    ",
+                        params: {
+                            rating: null
+                        }
+                    }),
+                    __param(0, app_7.Inject("$log")),
+                    __param(1, app_7.Inject("$ionicLoading")),
+                    __param(2, app_7.Inject("navController")),
+                    __param(3, app_7.Inject("ratingService")),
+                    __param(4, app_7.Inject("$scope")), 
+                    __metadata('design:paramtypes', [Object, Object, app_7.NavController, RatingService_1.RatingService, Object])
+                ], EditRatingDetailsPage);
+                return EditRatingDetailsPage;
+            }(app_7.PageBase));
+            exports_38("EditRatingDetailsPage", EditRatingDetailsPage);
+        }
+    }
+});
+System.register("ts/pages/viewRating", ["ts/app", "ts/services/ratingService", "ts/pages/editRatingDetails"], function(exports_39, context_39) {
+    "use strict";
+    var __moduleName = context_39 && context_39.id;
+    var app_8, ratingService_1, editRatingDetails_1;
+    var ViewRatingPage;
+    return {
+        setters:[
+            function (app_8_1) {
+                app_8 = app_8_1;
+            },
+            function (ratingService_1_1) {
+                ratingService_1 = ratingService_1_1;
+            },
+            function (editRatingDetails_1_1) {
+                editRatingDetails_1 = editRatingDetails_1_1;
+            }],
+        execute: function() {
+            ViewRatingPage = (function (_super) {
+                __extends(ViewRatingPage, _super);
+                function ViewRatingPage(_logService, _ionicPopupService, _ionicLoadingService, _nav, _ratingService, scope) {
+                    _super.call(this, scope);
+                    this._logService = _logService;
+                    this._ionicPopupService = _ionicPopupService;
+                    this._ionicLoadingService = _ionicLoadingService;
                     this._nav = _nav;
                     this._ratingService = _ratingService;
                     this.searchResults = null;
-                    this._logService.log("Opened AddRatingDetailsPage");
+                    this._logService.log("Opened ViewRatingDetailsPage");
                 }
-                AddRatingDetailsPage.prototype.save = function (value, details) {
+                ViewRatingPage.prototype.delete = function () {
                     var _this = this;
-                    var rating = {
-                        value: value,
-                        details: details,
-                        cigar: this.cigar
-                    };
-                    this._ratingService.post(rating)
-                        .then(function (response) {
-                        _this._nav.push(myRatings_1.MyRatingsPage, null, { historyRoot: true });
+                    this._ionicPopupService.confirm({
+                        title: "Are you sure?",
+                        okText: "Yes",
+                        cancelText: "No"
+                    }).then(function (response) {
+                        if (response) {
+                            _this._ionicLoadingService.show({ template: "Loading..." });
+                            _this._ratingService.delete(_this.rating)
+                                .then(function (response) {
+                                _this._ionicLoadingService.hide();
+                                _this._nav.pop();
+                            })
+                                .catch(function (response) {
+                                _this._ionicLoadingService.hide();
+                            });
+                        }
                     });
                 };
-                AddRatingDetailsPage.prototype.goToFindCigar = function () {
-                    this._nav.pop({
-                        cigar: this.cigar
-                    });
+                ViewRatingPage.prototype.goToEdit = function () {
+                    this._nav.push(editRatingDetails_1.EditRatingDetailsPage, { rating: this.rating });
                 };
-                AddRatingDetailsPage.prototype.ionViewWillEnter = function (event, data) {
-                    this.cigar = data.stateParams.cigar;
-                    data.stateParams.cigar = null;
-                    this._logService.debug(this.cigar, data.stateParams.cigar);
+                ViewRatingPage.prototype.ionViewWillEnter = function (event, data) {
+                    this.rating = data.stateParams.rating;
+                    if (data.stateParams.edited) {
+                        this._nav.history.removeBackView();
+                    }
                 };
-                AddRatingDetailsPage = __decorate([
-                    app_8.SideMenuPage(app_8.IonicApplication, "mainMenu", "addRatingDetails", {
-                        url: "/addRatingDetails",
-                        template: "\n        <ion-view view-title=\"Add Rating\">\n            <ion-content class=\"padding\">\n                <div class=\"card\">\n                    <div class=\"item item-divider\">\n                        Rating\n                    </div>\n                    <div class=\"item item-text-wrap\">\n                        <five-star-rating ng-init=\"value = 3;\" rating=\"value\" style=\"font-size: 32px;\"></five-star-rating>\n                    </div>\n                </div>\n                <div class=\"card\">\n                    <div class=\"item item-divider\">\n                        Details\n                    </div>\n                    <div class=\"item item-text-wrap\">\n                        <label class=\"item item-input\">\n                            <textarea rows=\"6\" placeholder=\"Details\" ng-model=\"details\"></textarea>\n                        </label>\n                    </div>\n                </div>\n\n                <div class=\"padding\">\n                    <button class=\"button button-block button-positive\"\n                            ng-disabled=\"!value || !details\"\n                            ng-click=\"$ctrl.save(value, details)\">\n                        Submit\n                    </button>\n                </div>\n            </ion-content>\n        </ion-view>\n    ",
+                ViewRatingPage = __decorate([
+                    app_8.SideMenuPage(app_8.IonicApplication, "mainMenu", "viewRating", {
+                        url: "/viewRating",
+                        template: "\n        <ion-view view-title=\"View Rating\">\n            <ion-content class=\"padding\">\n                <div class=\"card\">\n                    <div class=\"item item-divider\">\n                        Rating\n                    </div>\n                    <div class=\"item item-text-wrap\">\n                        <five-star-rating readonly=\"true\" rating=\"$ctrl.rating.value\" style=\"font-size: 32px;\"></five-star-rating>\n                    </div>\n                </div>\n\n                <div class=\"card\">\n                    <div class=\"item item-divider\">\n                        Details\n                    </div>\n                    <div class=\"item item-text-wrap\">\n                        {{$ctrl.rating.details}}\n                    </div>\n                    <div class=\"item item-divider\" style=\"text-align: right\">\n                        <small>\n                            <last-modified-date date=\"$ctrl.rating.lastModifiedAt\" prefix=\"'Last updated'\" full-date-prefix=\"'at'\">\n                            </last-modified-date>\n                        </small>\n                    </div>\n                </div>\n\n                <button class=\"button button-energized button-block\"\n                    ng-click=\"$ctrl.goToEdit()\">\n                    Edit Rating\n                </button>\n\n                <button class=\"button button-assertive button-block\"\n                    ng-click=\"$ctrl.delete()\">\n                    Delete Rating\n                </button>\n            </ion-content>\n        </ion-view>\n    ",
                         params: {
-                            cigar: null
+                            rating: null,
+                            edited: false
                         }
                     }),
                     __param(0, app_8.Inject("$log")),
-                    __param(1, app_8.Inject("$timeout")),
-                    __param(2, app_8.Inject("navController")),
-                    __param(3, app_8.Inject("ratingService")),
-                    __param(4, app_8.Inject("$scope")), 
-                    __metadata('design:paramtypes', [Object, Function, app_8.NavController, RatingService_1.RatingService, Object])
-                ], AddRatingDetailsPage);
-                return AddRatingDetailsPage;
+                    __param(1, app_8.Inject("$ionicPopup")),
+                    __param(2, app_8.Inject("$ionicLoading")),
+                    __param(3, app_8.Inject("navController")),
+                    __param(4, app_8.Inject("ratingService")),
+                    __param(5, app_8.Inject("$scope")), 
+                    __metadata('design:paramtypes', [Object, Object, Object, app_8.NavController, ratingService_1.RatingService, Object])
+                ], ViewRatingPage);
+                return ViewRatingPage;
             }(app_8.PageBase));
-            exports_39("AddRatingDetailsPage", AddRatingDetailsPage);
+            exports_39("ViewRatingPage", ViewRatingPage);
         }
     }
 });
@@ -1607,10 +1637,10 @@ System.register("ts/pages/findCigar", ["ts/app", "ts/services/cigarService", "ts
         execute: function() {
             FindCigarPage = (function (_super) {
                 __extends(FindCigarPage, _super);
-                function FindCigarPage(_logService, _timeoutService, _nav, _cigarService, scope) {
+                function FindCigarPage(_logService, _ionicLoadingService, _nav, _cigarService, scope) {
                     _super.call(this, scope);
                     this._logService = _logService;
-                    this._timeoutService = _timeoutService;
+                    this._ionicLoadingService = _ionicLoadingService;
                     this._nav = _nav;
                     this._cigarService = _cigarService;
                     this.searchResults = null;
@@ -1618,9 +1648,14 @@ System.register("ts/pages/findCigar", ["ts/app", "ts/services/cigarService", "ts
                 }
                 FindCigarPage.prototype.search = function (searchQuery) {
                     var _this = this;
+                    this._ionicLoadingService.show({ template: "Loading..." });
                     this._cigarService.get(searchQuery)
                         .then(function (response) {
+                        _this._ionicLoadingService.hide();
                         _this.searchResults = response.data;
+                    })
+                        .catch(function (response) {
+                        _this._ionicLoadingService.hide();
                     });
                 };
                 FindCigarPage.prototype.selectCigar = function (cigar) {
@@ -1640,17 +1675,17 @@ System.register("ts/pages/findCigar", ["ts/app", "ts/services/cigarService", "ts
                 FindCigarPage = __decorate([
                     app_9.SideMenuPage(app_9.IonicApplication, "mainMenu", "findCigar", {
                         url: "/findCigar",
-                        template: "\n        <ion-view view-title=\"Add Rating\">\n            <ion-content class=\"padding\">\n                <label class=\"item item-input item-floating-label\">\n                    <span class=\"input-label\">Search for Cigar</span>\n                    <input type=\"text\" \n                        placeholder=\"Search for Cigar\" \n                        ng-model=\"searchQuery\" \n                        ng-model-options=\"{ debounce: 300 }\"\n                        ng-change=\"$ctrl.search(searchQuery)\">\n                </label>\n                \n                <ion-list>\n                    <ion-item collection-repeat=\"searchResult in $ctrl.searchResults\"\n                        ng-click=\"$ctrl.selectCigar(searchResult)\">\n                        {{searchResult.brand}} - {{searchResult.name}}\n                    </ion-item>\n\n                    <ion-item ng-show=\"$ctrl.searchResults != null && $ctrl.searchResults.length === 0\"\n                            class=\"energized\">\n                        Sorry, we couldn't find any results!\n                    </ion-item>\n                </ion-list>\n                \n                <div class=\"padding\" ng-show=\"$ctrl.searchResults != null\">\n                    <button class=\"button button-block button-energized button-small\"\n                            ng-click=\"$ctrl.goToCreateCigar()\">\n                        Can't find your cigar? Add it!\n                    </button>\n                </div>\n                \n                <div class=\"padding\">\n                    <button class=\"button button-block button-positive\"\n                            ng-disabled=\"!value || !details\"\n                            ng-click=\"$ctrl.save(value, details)\">\n                        Submit\n                    </button>\n                </div>\n            </ion-content>\n        </ion-view>\n    ",
+                        template: "\n        <ion-view view-title=\"Find Cigar\">\n            <ion-content class=\"padding\">\n                <div class=\"bar bar-header item-input-inset\" style=\"margin-bottom: 10px;\">\n                    <label class=\"item-input-wrapper\">\n                        <i class=\"icon ion-ios-search placeholder-icon\"></i>\n                        <input type=\"text\" \n                            placeholder=\"Search for Cigar\" \n                            ng-model=\"searchQuery\" \n                            ng-model-options=\"{ debounce: 300 }\"\n                            ng-change=\"$ctrl.search(searchQuery)\">\n                    </label>\n                </div>\n                \n                <ion-list>\n                    <ion-item collection-repeat=\"searchResult in $ctrl.searchResults\"\n                        ng-click=\"$ctrl.selectCigar(searchResult)\">\n                        {{searchResult.brand}} - {{searchResult.name}}\n                    </ion-item>\n\n                    <ion-item ng-show=\"$ctrl.searchResults != null && $ctrl.searchResults.length === 0\"\n                            class=\"energized\">\n                        Sorry, we couldn't find any results!\n                    </ion-item>\n                </ion-list>\n                \n                <div class=\"padding\" ng-show=\"$ctrl.searchResults != null\">\n                    <button class=\"button button-block button-energized button-small\"\n                            ng-click=\"$ctrl.goToCreateCigar()\">\n                        Can't find your cigar? Add it!\n                    </button>\n                </div>\n            </ion-content>\n        </ion-view>\n    ",
                         params: {
                             cigar: null
                         }
                     }),
                     __param(0, app_9.Inject("$log")),
-                    __param(1, app_9.Inject("$timeout")),
+                    __param(1, app_9.Inject("$ionicLoading")),
                     __param(2, app_9.Inject("navController")),
                     __param(3, app_9.Inject("cigarService")),
                     __param(4, app_9.Inject("$scope")), 
-                    __metadata('design:paramtypes', [Object, Function, app_9.NavController, cigarService_2.CigarService, Object])
+                    __metadata('design:paramtypes', [Object, Object, app_9.NavController, cigarService_2.CigarService, Object])
                 ], FindCigarPage);
                 return FindCigarPage;
             }(app_9.PageBase));
@@ -1658,47 +1693,211 @@ System.register("ts/pages/findCigar", ["ts/app", "ts/services/cigarService", "ts
         }
     }
 });
-System.register("ts/pages/forgotPassword", ["ts/app"], function(exports_41, context_41) {
+System.register("ts/pages/myRatings", ["ts/app", "ts/services/ratingService", "ts/pages/viewRating", "ts/pages/findCigar"], function(exports_41, context_41) {
     "use strict";
     var __moduleName = context_41 && context_41.id;
-    var app_10;
-    var ForgotPasswordController;
+    var app_10, ratingService_2, viewRating_1, findCigar_1;
+    var MyRatingsPage;
     return {
         setters:[
             function (app_10_1) {
                 app_10 = app_10_1;
+            },
+            function (ratingService_2_1) {
+                ratingService_2 = ratingService_2_1;
+            },
+            function (viewRating_1_1) {
+                viewRating_1 = viewRating_1_1;
+            },
+            function (findCigar_1_1) {
+                findCigar_1 = findCigar_1_1;
             }],
         execute: function() {
-            ForgotPasswordController = (function (_super) {
-                __extends(ForgotPasswordController, _super);
-                function ForgotPasswordController(scope) {
+            MyRatingsPage = (function (_super) {
+                __extends(MyRatingsPage, _super);
+                function MyRatingsPage(_logService, _ionicLoadingService, _nav, _ratingService, scope) {
                     _super.call(this, scope);
+                    this._logService = _logService;
+                    this._ionicLoadingService = _ionicLoadingService;
+                    this._nav = _nav;
+                    this._ratingService = _ratingService;
+                    this.ratings = [];
+                    this.isLoading = false;
+                    this._logService.log("Opened myRating");
                 }
-                ForgotPasswordController.prototype.forgotPassword = function (name) {
-                    console.log(name);
+                MyRatingsPage.prototype.goToViewRating = function (rating) {
+                    this._nav.push(viewRating_1.ViewRatingPage, { rating: rating });
                 };
-                ForgotPasswordController = __decorate([
-                    app_10.Page(app_10.IonicApplication, "forgotPassword", {
-                        template: "\n        <ion-view title=\"Register\">\n            <ion-nav-bar class=\"bar-balanced\">\n                <ion-nav-back-button>\n                </ion-nav-back-button>\n            </ion-nav-bar>\n            <ion-content padding=\"true\" scroll=\"false\">\n                <label class=\"item item-input\" style=\"margin-bottom: 40px;\">\n                    <span class=\"input-label\">Name</span>\n                    <input type=\"text\" ng-model=\"name\">\n                </label>\n                <button type=\"submit\" class=\"button button-calm button-block\" ng-click=\"$ctrl.forgotPassword(name)\">\n                    Login\n                </button>\n            </ion-content>\n        </ion-view>\n    "
+                MyRatingsPage.prototype.goToFindCigar = function () {
+                    this._nav.push(findCigar_1.FindCigarPage);
+                };
+                MyRatingsPage.prototype.lastModifiedDisplay = function (rating) {
+                    var lastModifiedMoment = window.moment(rating.lastModifiedAt);
+                    if (lastModifiedMoment > window.moment().subtract(7, "days")) {
+                        return lastModifiedMoment.fromNow();
+                    }
+                    return lastModifiedMoment.format("MMMM Do YYYY, h:mm a");
+                };
+                MyRatingsPage.prototype.ionViewDidEnter = function () {
+                    var _this = this;
+                    this.isLoading = true;
+                    this._ionicLoadingService.show({ template: "Loading..." });
+                    this._ratingService.get()
+                        .then(function (response) {
+                        _this.isLoading = false;
+                        _this._ionicLoadingService.hide();
+                        _this.ratings = response.data;
+                    })
+                        .catch(function (response) {
+                        _this.isLoading = false;
+                        _this._ionicLoadingService.hide();
+                    });
+                };
+                MyRatingsPage = __decorate([
+                    app_10.SideMenuPage(app_10.IonicApplication, "mainMenu", "myRatings", {
+                        url: "/myRatings",
+                        template: "\n        <ion-view view-title=\"My Ratings\">\n            <ion-content class=\"padding\">\n                <div class=\"card\" ng-show=\"!$ctrl.ratings && !$ctrl.isLoading\">\n                    <div class=\"item\" style=\"text-align: center\">\n                        <strong>No ratings yet!</strong>\n\n                        <button class=\"button button-positive button-block\" ng-click=\"$ctrl.goToFindCigar()\">\n                            Add your first rating\n                        </button>\n                    </div>\n                </div>\n                <ion-list ng-show=\"$ctrl.ratings && $ctrl.ratings.length\">\n                    <ion-item collection-repeat=\"rating in $ctrl.ratings\" ng-click=\"$ctrl.goToViewRating(rating)\">\n                        <div>\n                            {{rating.cigar.brand}} - {{rating.cigar.name}}\n                            <span class=\"item-note\">\n                                <five-star-rating rating=\"rating.value\" readonly=\"true\" style=\"float: right;\"></five-star-rating>\n                            </span>\n                        </div>\n                            \n                        <last-modified-date date=\"$ctrl.rating.lastModifiedAt\" \n                            full-date-only=\"true\"\n                            style=\"display: block; text-align: right; font-size: 12px;\">\n                        </last-modified-date>\n                    </ion-item>\n                </ion-list>\n            </ion-content>\n        </ion-view>\n    "
                     }),
-                    __param(0, app_10.Inject("$scope")), 
-                    __metadata('design:paramtypes', [Object])
-                ], ForgotPasswordController);
-                return ForgotPasswordController;
+                    __param(0, app_10.Inject("$log")),
+                    __param(1, app_10.Inject("$ionicLoading")),
+                    __param(2, app_10.Inject("navController")),
+                    __param(3, app_10.Inject("ratingService")),
+                    __param(4, app_10.Inject("$scope")), 
+                    __metadata('design:paramtypes', [Object, Object, app_10.NavController, ratingService_2.RatingService, Object])
+                ], MyRatingsPage);
+                return MyRatingsPage;
             }(app_10.PageBase));
-            exports_41("ForgotPasswordController", ForgotPasswordController);
+            exports_41("MyRatingsPage", MyRatingsPage);
         }
     }
 });
-System.register("ts/pages/home", ["ts/app"], function(exports_42, context_42) {
+System.register("ts/pages/addRatingDetails", ["ts/app", "ts/services/ratingService", "ts/pages/myRatings"], function(exports_42, context_42) {
     "use strict";
     var __moduleName = context_42 && context_42.id;
-    var app_11;
-    var HomePage;
+    var app_11, RatingService_2, myRatings_2;
+    var AddRatingDetailsPage;
     return {
         setters:[
             function (app_11_1) {
                 app_11 = app_11_1;
+            },
+            function (RatingService_2_1) {
+                RatingService_2 = RatingService_2_1;
+            },
+            function (myRatings_2_1) {
+                myRatings_2 = myRatings_2_1;
+            }],
+        execute: function() {
+            AddRatingDetailsPage = (function (_super) {
+                __extends(AddRatingDetailsPage, _super);
+                function AddRatingDetailsPage(_logService, _ionicLoadingService, _nav, _ratingService, scope) {
+                    _super.call(this, scope);
+                    this._logService = _logService;
+                    this._ionicLoadingService = _ionicLoadingService;
+                    this._nav = _nav;
+                    this._ratingService = _ratingService;
+                    this.searchResults = null;
+                    this._logService.log("Opened AddRatingDetailsPage");
+                }
+                AddRatingDetailsPage.prototype.save = function (value, details) {
+                    var _this = this;
+                    var rating = {
+                        value: value,
+                        details: details,
+                        cigar: this.cigar
+                    };
+                    this._ionicLoadingService.show({ template: "Loading..." });
+                    this._ratingService.post(rating)
+                        .then(function (response) {
+                        _this._ionicLoadingService.hide();
+                        _this._nav.push(myRatings_2.MyRatingsPage, null, { historyRoot: true });
+                    })
+                        .catch(function (response) {
+                        _this._ionicLoadingService.hide();
+                    });
+                };
+                AddRatingDetailsPage.prototype.goToFindCigar = function () {
+                    this._nav.pop({
+                        cigar: this.cigar
+                    });
+                };
+                AddRatingDetailsPage.prototype.ionViewWillEnter = function (event, data) {
+                    this.cigar = data.stateParams.cigar;
+                };
+                AddRatingDetailsPage = __decorate([
+                    app_11.SideMenuPage(app_11.IonicApplication, "mainMenu", "addRatingDetails", {
+                        url: "/addRatingDetails",
+                        template: "\n        <ion-view view-title=\"Add Rating\">\n            <ion-content class=\"padding\">\n                <div class=\"card\">\n                    <div class=\"item item-divider\">\n                        Rating\n                    </div>\n                    <div class=\"item item-text-wrap\">\n                        <five-star-rating ng-init=\"value = 3;\" rating=\"value\" style=\"font-size: 32px;\"></five-star-rating>\n                    </div>\n                </div>\n                <div class=\"card\">\n                    <div class=\"item item-divider\">\n                        Details\n                    </div>\n                    <div class=\"item item-text-wrap\">\n                        <textarea rows=\"6\" ng-model=\"details\" style=\"width: 100%; resize: none;\"></textarea>\n                    </div>\n                </div>\n\n                <div class=\"padding\">\n                    <button class=\"button button-block button-positive\"\n                            ng-disabled=\"!value || !details\"\n                            ng-click=\"$ctrl.save(value, details)\">\n                        Submit\n                    </button>\n                </div>\n            </ion-content>\n        </ion-view>\n    ",
+                        params: {
+                            cigar: null
+                        }
+                    }),
+                    __param(0, app_11.Inject("$log")),
+                    __param(1, app_11.Inject("$ionicLoading")),
+                    __param(2, app_11.Inject("navController")),
+                    __param(3, app_11.Inject("ratingService")),
+                    __param(4, app_11.Inject("$scope")), 
+                    __metadata('design:paramtypes', [Object, Object, app_11.NavController, RatingService_2.RatingService, Object])
+                ], AddRatingDetailsPage);
+                return AddRatingDetailsPage;
+            }(app_11.PageBase));
+            exports_42("AddRatingDetailsPage", AddRatingDetailsPage);
+        }
+    }
+});
+System.register("ts/pages/forgotPassword", ["ts/app", "ts/pages/myRatings"], function(exports_43, context_43) {
+    "use strict";
+    var __moduleName = context_43 && context_43.id;
+    var app_12, myRatings_3;
+    var ForgotPasswordController;
+    return {
+        setters:[
+            function (app_12_1) {
+                app_12 = app_12_1;
+            },
+            function (myRatings_3_1) {
+                myRatings_3 = myRatings_3_1;
+            }],
+        execute: function() {
+            ForgotPasswordController = (function (_super) {
+                __extends(ForgotPasswordController, _super);
+                function ForgotPasswordController(_openIddictHttpService, _nav, scope) {
+                    _super.call(this, scope);
+                    this._openIddictHttpService = _openIddictHttpService;
+                    this._nav = _nav;
+                }
+                ForgotPasswordController.prototype.forgotPassword = function (name) {
+                    console.log(name);
+                };
+                ForgotPasswordController.prototype.ionViewWillEnter = function (event, data) {
+                    if (this._openIddictHttpService.token) {
+                        this._nav.push(myRatings_3.MyRatingsPage);
+                    }
+                };
+                ForgotPasswordController = __decorate([
+                    app_12.Page(app_12.IonicApplication, "forgotPassword", {
+                        template: "\n        <ion-view title=\"Register\">\n            <ion-nav-bar class=\"bar-positive\">\n                <ion-nav-back-button>\n                </ion-nav-back-button>\n            </ion-nav-bar>\n            <ion-content padding=\"true\" scroll=\"false\">\n                <label class=\"item item-input\" style=\"margin-bottom: 40px;\">\n                    <span class=\"input-label\">Name</span>\n                    <input type=\"text\" ng-model=\"name\">\n                </label>\n                <button type=\"submit\" class=\"button button-calm button-block\" ng-click=\"$ctrl.forgotPassword(name)\">\n                    Request New Password\n                </button>\n            </ion-content>\n        </ion-view>\n    "
+                    }),
+                    __param(0, app_12.Inject("openIddictHttpService")),
+                    __param(1, app_12.Inject("navController")),
+                    __param(2, app_12.Inject("$scope")), 
+                    __metadata('design:paramtypes', [Object, app_12.NavController, Object])
+                ], ForgotPasswordController);
+                return ForgotPasswordController;
+            }(app_12.PageBase));
+            exports_43("ForgotPasswordController", ForgotPasswordController);
+        }
+    }
+});
+System.register("ts/pages/home", ["ts/app"], function(exports_44, context_44) {
+    "use strict";
+    var __moduleName = context_44 && context_44.id;
+    var app_13;
+    var HomePage;
+    return {
+        setters:[
+            function (app_13_1) {
+                app_13 = app_13_1;
             }],
         execute: function() {
             HomePage = (function (_super) {
@@ -1709,155 +1908,237 @@ System.register("ts/pages/home", ["ts/app"], function(exports_42, context_42) {
                     this._logService.log("Opened home");
                 }
                 HomePage = __decorate([
-                    app_11.SideMenuPage(app_11.IonicApplication, "mainMenu", "home", {
+                    app_13.SideMenuPage(app_13.IonicApplication, "mainMenu", "home", {
                         url: "/home",
                         template: "\n        <ion-view view-title=\"Page 1\">\n            <ion-content class=\"padding\">\n                <button class=\"button button-positive button-block\">I'm a home button!</button>\n            </ion-content>\n        </ion-view>\n    "
                     }),
-                    __param(0, app_11.Inject("$log")),
-                    __param(1, app_11.Inject("$scope")), 
+                    __param(0, app_13.Inject("$log")),
+                    __param(1, app_13.Inject("$scope")), 
                     __metadata('design:paramtypes', [Object, Object])
                 ], HomePage);
                 return HomePage;
-            }(app_11.PageBase));
-            exports_42("HomePage", HomePage);
+            }(app_13.PageBase));
+            exports_44("HomePage", HomePage);
         }
     }
 });
-System.register("ts/pages/login", ["ts/app", "ts/pages/home"], function(exports_43, context_43) {
-    "use strict";
-    var __moduleName = context_43 && context_43.id;
-    var app_12, home_1;
-    var LoginPage;
-    return {
-        setters:[
-            function (app_12_1) {
-                app_12 = app_12_1;
-            },
-            function (home_1_1) {
-                home_1 = home_1_1;
-            }],
-        execute: function() {
-            LoginPage = (function (_super) {
-                __extends(LoginPage, _super);
-                function LoginPage(_logService, _stateService, _openIddictHttpService, _nav, scope) {
-                    _super.call(this, scope);
-                    this._logService = _logService;
-                    this._stateService = _stateService;
-                    this._openIddictHttpService = _openIddictHttpService;
-                    this._nav = _nav;
-                }
-                LoginPage.prototype.login = function (username, password) {
-                    var _this = this;
-                    this._openIddictHttpService.login(username, password)
-                        .then(function (response) {
-                        _this._nav.push(home_1.HomePage);
-                    })
-                        .catch(function (response) {
-                        alert(response.error_description);
-                    });
-                };
-                LoginPage = __decorate([
-                    app_12.Page(app_12.IonicApplication, "login", {
-                        url: "/login",
-                        template: "\n        <ion-view title=\"Login\">\n            <ion-nav-bar class=\"bar-balanced\">\n                <ion-nav-back-button>\n                </ion-nav-back-button>\n            </ion-nav-bar>\n            <ion-content padding=\"true\" scroll=\"false\" ng-init=\"username = ''; password = '';\">\n                <label class=\"item item-input\" style=\"margin-bottom: 40px;\">\n                    <span class=\"input-label\">Name</span>\n                    <input type=\"text\" ng-model=\"username\">\n                </label>\n                <label class=\"item item-input\" style=\"margin-bottom: 40px;\">\n                    <span class=\"input-label\">Password</span>\n                    <input type=\"password\" ng-model=\"password\">\n                </label>\n                <button type=\"submit\" class=\"button button-calm button-block\" ng-click=\"$ctrl.login(username, password)\">\n                    Login\n                </button>\n            </ion-content>\n        </ion-view>\n    "
-                    }),
-                    __param(0, app_12.Inject("$log")),
-                    __param(1, app_12.Inject("$state")),
-                    __param(2, app_12.Inject("openIddictHttpService")),
-                    __param(3, app_12.Inject("navController")),
-                    __param(4, app_12.Inject("$scope")), 
-                    __metadata('design:paramtypes', [Object, Object, Object, app_12.NavController, Object])
-                ], LoginPage);
-                return LoginPage;
-            }(app_12.PageBase));
-            exports_43("LoginPage", LoginPage);
-        }
-    }
-});
-System.register("ts/pages/mainMenu", ["ts/app", "ts/pages/myRatings", "ts/pages/findCigar"], function(exports_44, context_44) {
-    "use strict";
-    var __moduleName = context_44 && context_44.id;
-    var app_13, myRatings_2, findCigar_1;
-    var MainMenu;
-    return {
-        setters:[
-            function (app_13_1) {
-                app_13 = app_13_1;
-            },
-            function (myRatings_2_1) {
-                myRatings_2 = myRatings_2_1;
-            },
-            function (findCigar_1_1) {
-                findCigar_1 = findCigar_1_1;
-            }],
-        execute: function() {
-            MainMenu = (function (_super) {
-                __extends(MainMenu, _super);
-                function MainMenu(_logService, _nav) {
-                    _super.call(this);
-                    this._logService = _logService;
-                    this._nav = _nav;
-                    this._logService.log("Opened the main menu page");
-                }
-                MainMenu.prototype.goToMyRatings = function () {
-                    this._nav.push(myRatings_2.MyRatingsPage, null, { historyRoot: true, disableAnimate: true });
-                };
-                MainMenu.prototype.goToAddRatings = function () {
-                    this._nav.push(findCigar_1.FindCigarPage, null, { historyRoot: true, disableAnimate: true });
-                };
-                MainMenu = __decorate([
-                    app_13.SideMenu(app_13.IonicApplication, "mainMenu", {
-                        template: "\n        <ion-list>\n            <ion-item menu-close ng-click=\"$ctrl.goToMyRatings()\">\n                My Ratings\n            </ion-item>\n            <ion-item menu-close ng-click=\"$ctrl.goToAddRatings()\">\n                Add Rating\n            </ion-item>\n        </ion-list>\n    "
-                    }),
-                    __param(0, app_13.Inject("$log")),
-                    __param(1, app_13.Inject("navController")), 
-                    __metadata('design:paramtypes', [Object, app_13.NavController])
-                ], MainMenu);
-                return MainMenu;
-            }(app_13.SideMenuBase));
-            exports_44("MainMenu", MainMenu);
-        }
-    }
-});
-System.register("ts/pages/register", ["ts/app"], function(exports_45, context_45) {
+System.register("ts/pages/register", ["ts/app", "ts/pages/myRatings"], function(exports_45, context_45) {
     "use strict";
     var __moduleName = context_45 && context_45.id;
-    var app_14;
+    var app_14, myRatings_4;
     var RegisterPage;
     return {
         setters:[
             function (app_14_1) {
                 app_14 = app_14_1;
+            },
+            function (myRatings_4_1) {
+                myRatings_4 = myRatings_4_1;
             }],
         execute: function() {
             RegisterPage = (function (_super) {
                 __extends(RegisterPage, _super);
-                function RegisterPage(_logService, _openIddictHttpService, scope) {
+                function RegisterPage(_logService, _ionicPopupService, _ionicLoadingService, _openIddictHttpService, _nav, scope) {
                     _super.call(this, scope);
                     this._logService = _logService;
+                    this._ionicPopupService = _ionicPopupService;
+                    this._ionicLoadingService = _ionicLoadingService;
                     this._openIddictHttpService = _openIddictHttpService;
+                    this._nav = _nav;
                 }
-                RegisterPage.prototype.register = function (username, password) {
-                    this._openIddictHttpService.register(username, password)
+                RegisterPage.prototype.register = function (email, password, confirmPassword) {
+                    var _this = this;
+                    if (!email || !password || !confirmPassword) {
+                        return;
+                    }
+                    if (!this.poorlyValidateEmail(email)) {
+                        this._ionicPopupService.alert({
+                            title: "Could not register",
+                            template: "'" + email + "' is not a valid email address.\""
+                        });
+                        return;
+                    }
+                    if (password !== confirmPassword) {
+                        this._ionicPopupService.alert({
+                            title: "Could not register",
+                            template: "The entered passwords do not match."
+                        });
+                        return;
+                    }
+                    this._ionicLoadingService.show({ template: "Loading..." });
+                    this._openIddictHttpService.register(email, password)
                         .then(function (response) {
-                        console.log(response);
+                        _this._ionicLoadingService.hide();
+                        _this._nav.push(myRatings_4.MyRatingsPage);
                     })
                         .catch(function (response) {
-                        console.log(response);
+                        _this._ionicLoadingService.hide();
+                        _this._ionicPopupService.alert({
+                            title: "Could not register",
+                            template: response.messages.join(" ")
+                        });
                     });
+                };
+                RegisterPage.prototype.goToLogin = function () {
+                    this._nav.pop();
+                };
+                RegisterPage.prototype.ionViewWillEnter = function (event, data) {
+                    if (this._openIddictHttpService.token) {
+                        this._nav.push(myRatings_4.MyRatingsPage);
+                    }
+                };
+                RegisterPage.prototype.poorlyValidateEmail = function (email) {
+                    var re = /^(([^<>()\[\]\\.,;:\s@"]+(\.[^<>()\[\]\\.,;:\s@"]+)*)|(".+"))@((\[[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}])|(([a-zA-Z\-0-9]+\.)+[a-zA-Z]{2,}))$/;
+                    return re.test(email);
                 };
                 RegisterPage = __decorate([
                     app_14.Page(app_14.IonicApplication, "register", {
-                        template: "\n        <ion-view title=\"Register\">\n            <ion-nav-bar class=\"bar-balanced\">\n                <ion-nav-back-button>\n                </ion-nav-back-button>\n            </ion-nav-bar>\n            <ion-content padding=\"true\" scroll=\"false\">\n                <label class=\"item item-input\" style=\"margin-bottom: 40px;\">\n                    <span class=\"input-label\">Name</span>\n                    <input type=\"text\" ng-model=\"name\">\n                </label>\n                <label class=\"item item-input\" style=\"margin-bottom: 40px;\">\n                    <span class=\"input-label\">Password</span>\n                    <input type=\"password\" ng-model=\"password\">\n                </label>\n                <button type=\"submit\" class=\"button button-calm button-block\" ng-click=\"$ctrl.register(name, password)\">\n                    Register\n                </button>\n            </ion-content>\n        </ion-view>\n    ",
+                        template: "\n        <ion-view title=\"Register\">\n            <ion-nav-bar class=\"bar-positive\">\n                <ion-nav-back-button>\n                </ion-nav-back-button>\n            </ion-nav-bar>\n            <ion-content class=\"padding\" scroll=\"false\">\n                <div class=\"list list-inset\" style=\"background: transparent;\">\n                    <label class=\"item item-input\" style=\"margin-bottom: 10px;\">\n                        <input type=\"text\" ng-model=\"email\" placeholder=\"Email\">\n                    </label>\n                    <label class=\"item item-input\" style=\"margin-bottom: 10px;\">\n                        <input type=\"password\" ng-model=\"password\" placeholder=\"Password\">\n                    </label>\n                    <label class=\"item item-input\">\n                        <input type=\"password\" ng-model=\"confirmPassword\" placeholder=\"Confirm Password\">\n                    </label>\n                </div>\n                \n                <button type=\"submit\" \n                    class=\"button button-positive button-block\" \n                    ng-click=\"$ctrl.register(email, password, confirmPassword)\">\n                    Register\n                </button>\n                <button type=\"submit\" \n                    class=\"button button-stable button-block\" \n                    ng-click=\"$ctrl.goToLogin()\">\n                    Login with existing account\n                </button>\n            </ion-content>\n        </ion-view>\n    ",
                     }),
                     __param(0, app_14.Inject("$log")),
-                    __param(1, app_14.Inject("openIddictHttpService")),
-                    __param(2, app_14.Inject("$scope")), 
-                    __metadata('design:paramtypes', [Object, Object, Object])
+                    __param(1, app_14.Inject("$ionicPopup")),
+                    __param(2, app_14.Inject("$ionicLoading")),
+                    __param(3, app_14.Inject("openIddictHttpService")),
+                    __param(4, app_14.Inject("navController")),
+                    __param(5, app_14.Inject("$scope")), 
+                    __metadata('design:paramtypes', [Object, Object, Object, Object, app_14.NavController, Object])
                 ], RegisterPage);
                 return RegisterPage;
             }(app_14.PageBase));
             exports_45("RegisterPage", RegisterPage);
+        }
+    }
+});
+System.register("ts/pages/login", ["ts/app", "ts/pages/myRatings", "ts/pages/register"], function(exports_46, context_46) {
+    "use strict";
+    var __moduleName = context_46 && context_46.id;
+    var app_15, myRatings_5, register_1;
+    var LoginPage;
+    return {
+        setters:[
+            function (app_15_1) {
+                app_15 = app_15_1;
+            },
+            function (myRatings_5_1) {
+                myRatings_5 = myRatings_5_1;
+            },
+            function (register_1_1) {
+                register_1 = register_1_1;
+            }],
+        execute: function() {
+            LoginPage = (function (_super) {
+                __extends(LoginPage, _super);
+                function LoginPage(_logService, _stateService, _ionicPopupService, _ionicLoadingService, _openIddictHttpService, _nav, scope) {
+                    _super.call(this, scope);
+                    this._logService = _logService;
+                    this._stateService = _stateService;
+                    this._ionicPopupService = _ionicPopupService;
+                    this._ionicLoadingService = _ionicLoadingService;
+                    this._openIddictHttpService = _openIddictHttpService;
+                    this._nav = _nav;
+                }
+                LoginPage.prototype.login = function (email, password) {
+                    var _this = this;
+                    if (!email || !password) {
+                        return;
+                    }
+                    this._ionicLoadingService.show({ template: "Loading..." });
+                    this._openIddictHttpService.login(email, password)
+                        .then(function (response) {
+                        password = "";
+                        _this._ionicLoadingService.hide();
+                        _this._nav.push(myRatings_5.MyRatingsPage);
+                    })
+                        .catch(function (response) {
+                        _this._ionicLoadingService.hide();
+                        _this._ionicPopupService.alert({
+                            title: "Could not login",
+                            template: response && response.error_description
+                                ? response.error_description
+                                : "There was an error during login"
+                        });
+                    });
+                };
+                LoginPage.prototype.goToRegister = function () {
+                    this._nav.push(register_1.RegisterPage);
+                };
+                LoginPage.prototype.ionViewWillEnter = function (event, data) {
+                    if (this._openIddictHttpService.token) {
+                        this._nav.push(myRatings_5.MyRatingsPage);
+                    }
+                };
+                LoginPage = __decorate([
+                    app_15.Page(app_15.IonicApplication, "login", {
+                        url: "/login",
+                        template: "\n        <ion-view title=\"Login\" hide-nav-bar=\"true\">\n            <ion-nav-bar class=\"bar-positive\">\n                <ion-nav-back-button>\n                </ion-nav-back-button>\n            </ion-nav-bar>\n            <ion-content padding=\"true\" scroll=\"false\" ng-init=\"email = ''; password = '';\">\n                <img src=\"img/logo.png\" alt=\"CigarBar\" class=\"logo\" style=\"margin: 20px auto;\">\n\n                <div class=\"list list-inset\" style=\"background: transparent; margin: 0\">\n                    <label class=\"item item-input\" style=\"margin-bottom: 10px;\">\n                        <input type=\"text\" ng-model=\"email\" placeholder=\"Email\">\n                    </label>\n                    <label class=\"item item-input\">\n                        <input type=\"password\" ng-model=\"password\" placeholder=\"Password\">\n                    </label>\n                </div>\n                \n                <button type=\"submit\" class=\"button button-positive button-block\" ng-click=\"$ctrl.login(email, password)\">\n                    Login\n                </button>\n                <button type=\"submit\" class=\"button button-stable button-block\" ng-click=\"$ctrl.goToRegister()\">\n                    Create a new account\n                </button>\n            </ion-content>\n        </ion-view>\n    "
+                    }),
+                    __param(0, app_15.Inject("$log")),
+                    __param(1, app_15.Inject("$state")),
+                    __param(2, app_15.Inject("$ionicPopup")),
+                    __param(3, app_15.Inject("$ionicLoading")),
+                    __param(4, app_15.Inject("openIddictHttpService")),
+                    __param(5, app_15.Inject("navController")),
+                    __param(6, app_15.Inject("$scope")), 
+                    __metadata('design:paramtypes', [Object, Object, Object, Object, Object, app_15.NavController, Object])
+                ], LoginPage);
+                return LoginPage;
+            }(app_15.PageBase));
+            exports_46("LoginPage", LoginPage);
+        }
+    }
+});
+System.register("ts/pages/mainMenu", ["ts/app", "ts/pages/myRatings", "ts/pages/findCigar", "ts/pages/login"], function(exports_47, context_47) {
+    "use strict";
+    var __moduleName = context_47 && context_47.id;
+    var app_16, myRatings_6, findCigar_2, login_1;
+    var MainMenu;
+    return {
+        setters:[
+            function (app_16_1) {
+                app_16 = app_16_1;
+            },
+            function (myRatings_6_1) {
+                myRatings_6 = myRatings_6_1;
+            },
+            function (findCigar_2_1) {
+                findCigar_2 = findCigar_2_1;
+            },
+            function (login_1_1) {
+                login_1 = login_1_1;
+            }],
+        execute: function() {
+            MainMenu = (function (_super) {
+                __extends(MainMenu, _super);
+                function MainMenu(_logService, _nav, _openIddictHttpService) {
+                    _super.call(this);
+                    this._logService = _logService;
+                    this._nav = _nav;
+                    this._openIddictHttpService = _openIddictHttpService;
+                    this._logService.log("Opened the main menu page");
+                }
+                MainMenu.prototype.goToMyRatings = function () {
+                    this._nav.push(myRatings_6.MyRatingsPage, null, { historyRoot: true, disableAnimate: true });
+                };
+                MainMenu.prototype.goToAddRatings = function () {
+                    this._nav.push(findCigar_2.FindCigarPage, null, { historyRoot: true, disableAnimate: true });
+                };
+                MainMenu.prototype.logout = function () {
+                    this._openIddictHttpService.clearToken();
+                    this._nav.push(login_1.LoginPage, null, { historyRoot: true });
+                };
+                MainMenu = __decorate([
+                    app_16.SideMenu(app_16.IonicApplication, "mainMenu", {
+                        template: "\n        <ion-list>\n            <ion-item menu-close ng-click=\"$ctrl.goToMyRatings()\">\n                My Ratings\n            </ion-item>\n            <ion-item menu-close ng-click=\"$ctrl.goToAddRatings()\">\n                Add Rating\n            </ion-item>\n            <ion-item menu-close ng-click=\"$ctrl.logout()\">\n                Logout\n            </ion-item>\n        </ion-list>\n    ",
+                        menuHeaderBarClass: "bar-dark"
+                    }),
+                    __param(0, app_16.Inject("$log")),
+                    __param(1, app_16.Inject("navController")),
+                    __param(2, app_16.Inject("openIddictHttpService")), 
+                    __metadata('design:paramtypes', [Object, app_16.NavController, Object])
+                ], MainMenu);
+                return MainMenu;
+            }(app_16.SideMenuBase));
+            exports_47("MainMenu", MainMenu);
         }
     }
 });

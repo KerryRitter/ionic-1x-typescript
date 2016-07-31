@@ -6,16 +6,18 @@ import { AddRatingDetailsPage } from "./addRatingDetails";
 @SideMenuPage(IonicApplication, "mainMenu", "findCigar", {
     url: "/findCigar",
     template: `
-        <ion-view view-title="Add Rating">
+        <ion-view view-title="Find Cigar">
             <ion-content class="padding">
-                <label class="item item-input item-floating-label">
-                    <span class="input-label">Search for Cigar</span>
-                    <input type="text" 
-                        placeholder="Search for Cigar" 
-                        ng-model="searchQuery" 
-                        ng-model-options="{ debounce: 300 }"
-                        ng-change="$ctrl.search(searchQuery)">
-                </label>
+                <div class="bar bar-header item-input-inset" style="margin-bottom: 10px;">
+                    <label class="item-input-wrapper">
+                        <i class="icon ion-ios-search placeholder-icon"></i>
+                        <input type="text" 
+                            placeholder="Search for Cigar" 
+                            ng-model="searchQuery" 
+                            ng-model-options="{ debounce: 300 }"
+                            ng-change="$ctrl.search(searchQuery)">
+                    </label>
+                </div>
                 
                 <ion-list>
                     <ion-item collection-repeat="searchResult in $ctrl.searchResults"
@@ -35,14 +37,6 @@ import { AddRatingDetailsPage } from "./addRatingDetails";
                         Can't find your cigar? Add it!
                     </button>
                 </div>
-                
-                <div class="padding">
-                    <button class="button button-block button-positive"
-                            ng-disabled="!value || !details"
-                            ng-click="$ctrl.save(value, details)">
-                        Submit
-                    </button>
-                </div>
             </ion-content>
         </ion-view>
     `,
@@ -57,7 +51,7 @@ export class FindCigarPage extends PageBase {
 
     public constructor(
         @Inject("$log") private _logService: ng.ILogService,
-        @Inject("$timeout") private _timeoutService: ng.ITimeoutService,
+        @Inject("$ionicLoading") private _ionicLoadingService: ionic.loading.IonicLoadingService,
         @Inject("navController") private _nav: NavController,
         @Inject("cigarService") private _cigarService: CigarService,
         @Inject("$scope") scope: ng.IScope
@@ -67,9 +61,14 @@ export class FindCigarPage extends PageBase {
     }
 
     public search(searchQuery: string) {
+        this._ionicLoadingService.show({ template: "Loading..." });
         this._cigarService.get(searchQuery)
             .then((response) => {
+                this._ionicLoadingService.hide();
                 this.searchResults = response.data;
+            })
+            .catch((response) => {
+                this._ionicLoadingService.hide();
             });
     }
 

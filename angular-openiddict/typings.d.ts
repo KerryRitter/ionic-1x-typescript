@@ -1,8 +1,8 @@
 declare namespace openIddict {
     interface IOpenIddictHttpService {
-        register(username: string, password: string): ng.IHttpPromise<boolean>;
+        register(email: string, password: string): ng.IHttpPromise<boolean>;
 
-        login(username: string, password: string): ng.IHttpPromise<boolean>;
+        login(email: string, password: string): ng.IHttpPromise<boolean>;
 
         get<T>(url: string, config?: ng.IRequestShortcutConfig): ng.IHttpPromise<T>;
 
@@ -17,6 +17,10 @@ declare namespace openIddict {
         put<T>(url: string, data: any, config?: ng.IRequestShortcutConfig): ng.IHttpPromise<T>;
 
         patch<T>(url: string, data: any, config?: ng.IRequestShortcutConfig): ng.IHttpPromise<T>;
+
+        token: string;
+
+        clearToken();
     }
 
     interface IAuthenticateResponse {

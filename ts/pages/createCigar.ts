@@ -34,6 +34,7 @@ import { AddRatingDetailsPage } from "./addRatingDetails";
 export class CreateCigarPage extends PageBase {
     public constructor(
         @Inject("$log") private _logService: ng.ILogService,
+        @Inject("$ionicLoading") private _ionicLoadingService: ionic.loading.IonicLoadingService,
         @Inject("navController") private _nav: NavController,
         @Inject("cigarService") private _cigarService: CigarService,
         @Inject("$scope") scope: ng.IScope
@@ -48,11 +49,16 @@ export class CreateCigarPage extends PageBase {
             name: name
         } as ICigar;
 
+        this._ionicLoadingService.show({ template: "Loading..." });
         this._cigarService.post(cigar)
             .then((response) => { 
+                this._ionicLoadingService.hide();
                 this._nav.push(AddRatingDetailsPage, {
                     cigar: response.data
                 });
+            })
+            .catch((response) => {
+                this._ionicLoadingService.hide();
             });
     }
 }

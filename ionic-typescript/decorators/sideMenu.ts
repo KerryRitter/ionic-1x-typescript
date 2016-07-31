@@ -22,7 +22,7 @@ function getTemplateWrapper(config: ISideMenuConfig) {
                     <ion-header-bar class="${config.menuHeaderBarClass}">
                         <h1 class="title">${config.menuHeaderBarTitle}</h1>
                     </ion-header-bar>
-                    <ion-content>
+                    <ion-content scroll="false">
                         ${config.template}
                     </ion-content>
                 </ion-side-menu>

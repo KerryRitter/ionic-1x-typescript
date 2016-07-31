@@ -1,9 +1,10 @@
-import { IonicApplication, Page, Inject, PageBase } from "../app";
+import { IonicApplication, Page, Inject, PageBase, NavController } from "../app";
+import { MyRatingsPage } from "./myRatings";
 
 @Page(IonicApplication, "forgotPassword", {
     template: `
         <ion-view title="Register">
-            <ion-nav-bar class="bar-balanced">
+            <ion-nav-bar class="bar-positive">
                 <ion-nav-back-button>
                 </ion-nav-back-button>
             </ion-nav-bar>
@@ -13,7 +14,7 @@ import { IonicApplication, Page, Inject, PageBase } from "../app";
                     <input type="text" ng-model="name">
                 </label>
                 <button type="submit" class="button button-calm button-block" ng-click="$ctrl.forgotPassword(name)">
-                    Login
+                    Request New Password
                 </button>
             </ion-content>
         </ion-view>
@@ -21,6 +22,8 @@ import { IonicApplication, Page, Inject, PageBase } from "../app";
 })
 export class ForgotPasswordController extends PageBase {
     public constructor(
+        @Inject("openIddictHttpService") private _openIddictHttpService: openIddict.IOpenIddictHttpService,
+        @Inject("navController") private _nav: NavController,
         @Inject("$scope") scope: ng.IScope
     ) {
         super(scope);
@@ -28,5 +31,11 @@ export class ForgotPasswordController extends PageBase {
 
     public forgotPassword(name: string) {
         console.log(name);
+    }
+
+    public ionViewWillEnter(event: ng.IAngularEvent, data: any) {
+        if (this._openIddictHttpService.token) {
+            this._nav.push(MyRatingsPage);
+        }
     }
 }
