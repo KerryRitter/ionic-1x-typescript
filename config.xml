@@ -1,12 +1,8 @@
 <?xml version="1.0" encoding="UTF-8" standalone="yes"?>
 <widget id="com.ionicframework.starter" version="0.0.1" xmlns="http://www.w3.org/ns/widgets" xmlns:cdv="http://cordova.apache.org/ns/1.0">
-  <name>HelloCordova</name>
-  <description>&#xD;
-        An Ionic Framework and Cordova project.&#xD;
-    </description>
-  <author email="you@example.com" href="http://example.com.com/">&#xD;
-      Your Name Here&#xD;
-    </author>
+  <name>CigarBar</name>
+  <description>CigarBar allows cigar enthusiasts to track their favorite (or not-so-favorite) cigars right from their phone.</description>
+  <author email="kerry@arbiter.tech" href="http://www.arbiter.tech/">Kerry Ritter</author>
   <content src="index.html"/>
   <access origin="*"/>
   <preference name="webviewbounce" value="false"/>
