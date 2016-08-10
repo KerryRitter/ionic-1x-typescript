@@ -14,7 +14,7 @@ IonicApplication.config(["$urlRouterProvider", function ($urlRouterProvider) {
     $urlRouterProvider.otherwise("/login");
 }]);
 
-IonicApplication.value("baseUrl", "http://localhost:5000/");
+IonicApplication.value("baseUrl", "http://cigarbar.space/");
 
 @Run(IonicApplication)
 class IonicApplicationRun {
